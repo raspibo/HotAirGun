@@ -1,6 +1,13 @@
-# HotAriGun
-
+HotAriGun
+===================== 
 Hot Air Solder station project
+3D models for case
+
+Project previev
+=====================
+<img src="2017-03-02_230642.jpg" width="400">
+
+<img src="IMG_20160209_210410.jpg" width="400">
 
 License and copyright
 =====================
