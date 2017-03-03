@@ -3,7 +3,7 @@ HotAriGun
 Hot Air Solder station project
 3D models for case
 
-Project previev
+Project preview
 =====================
 <img src="2017-03-02_230642.jpg" width="400">
 
