@@ -5,9 +5,9 @@ Hot Air Solder station project
 
 Project preview
 =====================
-<img src="2017-03-02_230642.jpg" width="400">
+<img src="Pict/HAG.jpg" width="400">
 
-<img src="IMG_20160209_210410.jpg" width="400">
+<img src="Pict/HAG2.jpg.jpg" width="400">
 
 License and copyright
 =====================
