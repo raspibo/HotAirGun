@@ -1,4 +1,4 @@
-HotAriGun
+HotAirGun
 ===================== 
 Hot Air Solder station project
 3D models for case
