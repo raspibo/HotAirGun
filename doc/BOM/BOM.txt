@@ -1,0 +1,23 @@
+#Lista materiali per la sperimentazione iniziale
+
+Quantita   Materiale
+1          Pistola saldatore ad aria calda          
+1          Arduino Nano
+1          Display LCD 16x2
+1          interfaccia per display I2c
+1          Alimentatore switching 12V 2A    ( 24V 1A)
+1          Encoder con click "Rotella multifunzione"
+2          Pulsanti No
+3          Led Verdi 3mm
+1          Led Rosso 3mm
+1          MAX6675
+QB         Resistenze
+1          MAX6675
+1          IRF740
+1          Porta fusibile 5x20
+1          Ponte raddrizzatore
+1          Fotocaccopiatore MOC3032
+1          Fotocaccopiatore TLP672
+1          Diodo BA159
+1          Induttanza 10mH 1A
+2          Condensatori ceramici 10pF
