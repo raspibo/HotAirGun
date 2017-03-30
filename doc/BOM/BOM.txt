@@ -10,7 +10,6 @@ Quantita   Materiale
 2          Pulsanti No
 3          Led Verdi 3mm
 1          Led Rosso 3mm
-1          MAX6675
 QB         Resistenze
 1          MAX6675
 1          IRF740
