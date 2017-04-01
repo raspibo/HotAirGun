@@ -5,5 +5,5 @@ E' consigliabile annullare l'operazione in modo che venga caricato il simbolo pr
 
 Schema preview
 =====================
-<img src="Plot/HotAirGun.svg" width="400">
+<img src="https://cdn.rawgit.com/raspibo/HotAirGun/885d4312/kicad/Plot/HotAirGun.svg" width="400">
 
