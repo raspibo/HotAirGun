@@ -29,7 +29,7 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:HotAirGun-cache
-EELAYER 26 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -694,7 +694,7 @@ $Comp
 L Q_TRIAC_AAG TR1
 U 1 1 58DBE2AA
 P 3070 7240
-F 0 "TR1" H 45  -1685 50  0000 L CNN
+F 0 "TR1" H 3120 7290 50  0000 L CNN
 F 1 "~" H 45  -1760 50  0000 L CNN
 F 2 "" V -5  -1685 50  0001 C CNN
 F 3 "" V -80 -1710 50  0001 C CNN
@@ -1645,6 +1645,4 @@ Wire Wire Line
 	2620 6430 2620 6540
 Wire Wire Line
 	3070 6980 3070 7090
-Text Notes 13000 9300 0    60   ~ 0
-Msystem
 $EndSCHEMATC
