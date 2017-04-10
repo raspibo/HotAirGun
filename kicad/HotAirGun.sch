@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:HotAirGun-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -28,8 +29,10 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
+LIBS:w_connectors
+LIBS:max6675
 LIBS:HotAirGun-cache
-EELAYER 25 0
+EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -43,39 +46,6 @@ Comment2 "Licensed under the Apache License, Version 2.0 (the \"License\")"
 Comment3 "Copyright 2017-2018 sandroxGH infomsystemsrl@gmail.com, RaspiBO info@raspibo.org"
 Comment4 "http://www.raspibo.org/wiki/index.php?title=HotAirGun"
 $EndDescr
-$Comp
-L GND #GND_01
-U 1 1 58DBE2F1
-P 1800 4200
-F 0 "#GND_01" H 1800 4200 20  0001 C CNN
-F 1 "+GND" H 1800 4130 30  0000 C CNN
-F 2 "" H 1800 4200 70  0000 C CNN
-F 3 "" H 1800 4200 70  0000 C CNN
-	1    1800 4200
-	0    1    1    0   
-$EndComp
-$Comp
-L GND #GND_02
-U 1 1 58DBE2F0
-P 1800 4100
-F 0 "#GND_02" H 1800 4100 20  0001 C CNN
-F 1 "+GND" H 1800 4030 30  0000 C CNN
-F 2 "" H 1800 4100 70  0000 C CNN
-F 3 "" H 1800 4100 70  0000 C CNN
-	1    1800 4100
-	0    1    1    0   
-$EndComp
-$Comp
-L VCC #VCC_03
-U 1 1 58DBE2EF
-P 3800 2400
-F 0 "#VCC_03" H 3800 2400 20  0001 C CNN
-F 1 "+VCC" H 3800 2330 30  0000 C CNN
-F 2 "" H 3800 2400 70  0000 C CNN
-F 3 "" H 3800 2400 70  0000 C CNN
-	1    3800 2400
-	1    0    0    -1  
-$EndComp
 $Comp
 L VCC #VCC_08
 U 1 1 58DBE2E7
@@ -145,35 +115,24 @@ $EndComp
 $Comp
 L VCC #VCC_014
 U 1 1 58DBE2E1
-P 10300 2510
-F 0 "#VCC_014" H 10300 2360 50  0001 C CNN
-F 1 "VCC" H 10300 2660 50  0000 C CNN
-F 2 "" H 10300 2510 50  0000 C CNN
-F 3 "" H 10300 2510 50  0000 C CNN
-	1    10300 2510
+P 10350 2750
+F 0 "#VCC_014" H 10350 2600 50  0001 C CNN
+F 1 "VCC" H 10350 2900 50  0000 C CNN
+F 2 "" H 10350 2750 50  0000 C CNN
+F 3 "" H 10350 2750 50  0000 C CNN
+	1    10350 2750
 	-1   0    0    1   
 $EndComp
 $Comp
 L GND #GND_015
 U 1 1 58DBE2E0
-P 9500 2510
-F 0 "#GND_015" H 9500 2260 50  0001 C CNN
-F 1 "GND" H 9500 2360 50  0000 C CNN
-F 2 "" H 9500 2510 50  0000 C CNN
-F 3 "" H 9500 2510 50  0000 C CNN
-	1    9500 2510
+P 9450 2750
+F 0 "#GND_015" H 9450 2500 50  0001 C CNN
+F 1 "GND" H 9450 2600 50  0000 C CNN
+F 2 "" H 9450 2750 50  0000 C CNN
+F 3 "" H 9450 2750 50  0000 C CNN
+	1    9450 2750
 	1    0    0    -1  
-$EndComp
-$Comp
-L GND #GND_016
-U 1 1 58DBE2DF
-P 10250 1410
-F 0 "#GND_016" H 10250 1160 50  0001 C CNN
-F 1 "GND" H 10250 1260 50  0000 C CNN
-F 2 "" H 10250 1410 50  0000 C CNN
-F 3 "" H 10250 1410 50  0000 C CNN
-	1    10250 1410
-	0    -1   -1   0   
 $EndComp
 $Comp
 L GND #GND_017
@@ -449,7 +408,7 @@ F 3 "" H -630 -1190 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L POT PT1
+L POT-RESCUE-HotAirGun PT1
 U 1 1 58DBE2C1
 P 6350 2460
 F 0 "PT1" H 6350 2380 50  0000 C CNN
@@ -523,7 +482,7 @@ F 1 "~" H 6700 4150 50  0000 C CNN
 F 2 "" H 6700 4250 50  0000 C CNN
 F 3 "" H 6700 4250 50  0000 C CNN
 	1    6700 4250
-	0    -1   -1   0   
+	0    1    1    0   
 $EndComp
 $Comp
 L CONN_01X02 CN5
@@ -537,7 +496,7 @@ F 3 "" H 6000 3750 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L LED LD1
+L LED-RESCUE-HotAirGun LD1
 U 1 1 58DBE2B8
 P 6960 4450
 F 0 "LD1" H 6960 4550 50  0000 C CNN
@@ -559,7 +518,7 @@ F 3 "" H 6960 4050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED LD2
+L LED-RESCUE-HotAirGun LD2
 U 1 1 58DBE2B6
 P 7610 4450
 F 0 "LD2" H 7610 4550 50  0000 C CNN
@@ -581,7 +540,7 @@ F 3 "" H 7610 4050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED LD3
+L LED-RESCUE-HotAirGun LD3
 U 1 1 58DBE2B4
 P 8210 4450
 F 0 "LD3" H 8210 4550 50  0000 C CNN
@@ -603,7 +562,7 @@ F 3 "" H 8210 4050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED LD4
+L LED-RESCUE-HotAirGun LD4
 U 1 1 58DBE2B2
 P 8710 4450
 F 0 "LD4" H 8710 4550 50  0000 C CNN
@@ -834,28 +793,6 @@ F 3 "" H 9930 5600 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C11
-U 1 1 58DBE29C
-P 9900 1410
-F 0 "C11" H 9925 1510 50  0000 L CNN
-F 1 "~" H 9925 1310 50  0000 L CNN
-F 2 "" H 9938 1260 50  0000 C CNN
-F 3 "" H 9900 1410 50  0000 C CNN
-	1    9900 1410
-	0    1    1    0   
-$EndComp
-$Comp
-L C C1
-U 1 1 58DBE29B
-P 2400 1850
-F 0 "C1" H 2425 1950 50  0000 L CNN
-F 1 "~" H 2425 1750 50  0000 L CNN
-F 2 "" H 2438 1700 50  0000 C CNN
-F 3 "" H 2400 1850 50  0000 C CNN
-	1    2400 1850
-	1    0    0    -1  
-$EndComp
-$Comp
 L CONN_01X02 CN
 U 1 1 58DBE29A
 P 10890 2240
@@ -955,28 +892,6 @@ F 3 "" H 10430 5800 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Crystal Y1
-U 1 1 58DBE28C
-P 2750 2100
-F 0 "Y1" H 2750 2250 50  0000 C CNN
-F 1 "~" H 2750 1950 50  0000 C CNN
-F 2 "" H 2750 2100 50  0000 C CNN
-F 3 "" H 2750 2100 50  0000 C CNN
-	1    2750 2100
-	1    0    0    -1  
-$EndComp
-$Comp
-L C C2
-U 1 1 58DBE28B
-P 3300 1850
-F 0 "C2" H 3325 1950 50  0000 L CNN
-F 1 "~" H 3325 1750 50  0000 L CNN
-F 2 "" H 3338 1700 50  0000 C CNN
-F 3 "" H 3300 1850 50  0000 C CNN
-	1    3300 1850
-	1    0    0    -1  
-$EndComp
-$Comp
 L CONN_01X05 JP1
 U 1 1 58DBE28A
 P 2200 1000
@@ -997,28 +912,6 @@ F 2 "" H 2200 1250 50  0000 C CNN
 F 3 "" H 2200 1250 50  0000 C CNN
 	1    2200 1250
 	1    0    0    -1  
-$EndComp
-$Comp
-L GND #PWR041
-U 1 1 58DC5167
-P 2400 1650
-F 0 "#PWR041" H 2400 1400 50  0001 C CNN
-F 1 "GND" H 2400 1500 50  0000 C CNN
-F 2 "" H 2400 1650 50  0000 C CNN
-F 3 "" H 2400 1650 50  0000 C CNN
-	1    2400 1650
-	-1   0    0    1   
-$EndComp
-$Comp
-L GND #PWR042
-U 1 1 58DC5FE6
-P 3300 1650
-F 0 "#PWR042" H 3300 1400 50  0001 C CNN
-F 1 "GND" H 3300 1500 50  0000 C CNN
-F 2 "" H 3300 1650 50  0000 C CNN
-F 3 "" H 3300 1650 50  0000 C CNN
-	1    3300 1650
-	-1   0    0    1   
 $EndComp
 $Comp
 L GND #PWR043
@@ -1210,7 +1103,7 @@ F 3 "" H 4570 5550 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 Text GLabel 4820 5550 2    60   Input ~ 0
-RB0
+FASE_0
 Text GLabel 4870 6990 2    60   Input ~ 0
 220F
 Text GLabel 5170 7090 2    60   Input ~ 0
@@ -1235,11 +1128,11 @@ RB2
 Text GLabel 9950 3590 1    60   Input ~ 0
 RB6
 Text GLabel 8210 3850 1    60   Input ~ 0
-RC5
+A6
 Text GLabel 8710 3850 1    60   Input ~ 0
-RC6
+A7
 Text GLabel 5400 4300 0    60   Input ~ 0
-RC1
+FAN
 Text GLabel 7350 2160 3    60   Input ~ 0
 RA0
 Text GLabel 7550 2160 3    60   Input ~ 0
@@ -1252,6 +1145,45 @@ Text GLabel 8150 2160 3    60   Input ~ 0
 RA3
 Text GLabel 8350 2160 3    60   Input ~ 0
 RA4
+Text GLabel 10790 1890 1    60   Input ~ 0
+TC+
+Text GLabel 10990 1890 1    60   Input ~ 0
+TC+
+Text GLabel 1070 7140 0    60   Input ~ 0
+RB1
+Text GLabel 2970 7590 0    60   Input ~ 0
+220N
+Text GLabel 3270 6430 2    60   Input ~ 0
+220F
+$Comp
+L Arduino_Nano_Header J?
+U 1 1 58EBECF9
+P 2950 3800
+F 0 "J?" H 2950 4737 60  0000 C CNN
+F 1 "Arduino_Nano_Header" H 2950 4631 60  0000 C CNN
+F 2 "" H 2950 3800 60  0000 C CNN
+F 3 "" H 2950 3800 60  0000 C CNN
+	1    2950 3800
+	1    0    0    -1  
+$EndComp
+Text GLabel 1900 4400 0    60   Input ~ 0
+DO
+Text GLabel 1950 4500 0    60   Input ~ 0
+CLK
+Text GLabel 3950 4500 2    60   Input ~ 0
+CS
+Text GLabel 3900 3800 2    60   Input ~ 0
+SDA
+Text GLabel 3900 3900 2    60   Input ~ 0
+SCL
+Text GLabel 2100 3500 0    60   Input ~ 0
+FASE_0
+Text GLabel 1950 4200 0    60   Input ~ 0
+FAN
+Text GLabel 2450 4100 0    60   Input ~ 0
+RELE_SIC_220V
+Text GLabel 2000 4000 0    60   Input ~ 0
+TRIAC
 Wire Wire Line
 	3800 4100 4300 4100
 Wire Wire Line
@@ -1266,22 +1198,6 @@ Wire Wire Line
 	4400 1300 4400 4200
 Wire Wire Line
 	2300 1300 4400 1300
-Wire Wire Line
-	1700 2100 2400 2100
-Wire Wire Line
-	2400 2100 2600 2100
-Wire Wire Line
-	1700 2400 1700 2100
-Wire Wire Line
-	1800 2400 1700 2400
-Wire Wire Line
-	4000 2600 3800 2600
-Wire Wire Line
-	4000 2100 4000 2600
-Wire Wire Line
-	2900 2100 3300 2100
-Wire Wire Line
-	3300 2100 4000 2100
 Wire Wire Line
 	2300 1200 2300 1300
 Wire Wire Line
@@ -1298,8 +1214,6 @@ Wire Wire Line
 	1500 1400 2000 1400
 Connection ~ 1500 1900
 Connection ~ 1000 1900
-Connection ~ 2400 2100
-Connection ~ 3300 2100
 Wire Wire Line
 	7250 2460 7250 2060
 Wire Wire Line
@@ -1334,8 +1248,6 @@ Wire Wire Line
 Wire Wire Line
 	6300 4600 6300 4700
 Connection ~ 6300 4600
-Connection ~ 9700 1410
-Connection ~ 10100 1410
 Connection ~ 5400 1550
 Connection ~ 3070 6430
 Connection ~ 4300 4100
@@ -1360,10 +1272,6 @@ Connection ~ 10430 5550
 Wire Wire Line
 	2200 1250 2200 1200
 Wire Wire Line
-	2400 1650 2400 1700
-Wire Wire Line
-	3300 1650 3300 1700
-Wire Wire Line
 	1000 1350 1000 1400
 Wire Wire Line
 	1000 2250 1000 2350
@@ -1379,10 +1287,6 @@ Wire Wire Line
 	1400 1900 1500 1900
 Wire Wire Line
 	1500 1450 1500 1400
-Wire Wire Line
-	2400 2000 2400 2100
-Wire Wire Line
-	3300 2000 3300 2100
 Wire Wire Line
 	4900 2600 4900 2150
 Wire Wire Line
@@ -1543,10 +1447,6 @@ Wire Wire Line
 	9000 1810 9000 1710
 Wire Wire Line
 	9000 2210 9000 2110
-Text GLabel 10790 1890 1    60   Input ~ 0
-TC+
-Text GLabel 10990 1890 1    60   Input ~ 0
-TC+
 Wire Wire Line
 	10790 1890 10790 2040
 Wire Wire Line
@@ -1556,41 +1456,9 @@ Wire Wire Line
 Wire Wire Line
 	10990 2040 10990 1890
 Wire Wire Line
-	9700 1410 9750 1410
-Wire Wire Line
-	10050 1410 10100 1410
-Wire Wire Line
-	10100 1410 10250 1410
-Text GLabel 9700 1260 1    60   Input ~ 0
-TC+
-Wire Wire Line
-	9700 1260 9700 1410
-Wire Wire Line
-	9700 1410 9700 1610
-Text GLabel 10100 1260 1    60   Input ~ 0
-TC-
-Wire Wire Line
-	10100 1260 10100 1410
-Wire Wire Line
-	10100 1410 10100 1610
-Text GLabel 9700 2610 3    60   Input ~ 0
-RC2
-Text GLabel 9900 2610 3    60   Input ~ 0
-RC0
-Text GLabel 10100 2610 3    60   Input ~ 0
-RC3
-Wire Wire Line
-	9700 2460 9700 2610
-Wire Wire Line
-	9900 2610 9900 2460
-Wire Wire Line
-	10100 2460 10100 2610
-Wire Wire Line
 	1520 7340 1620 7340
 Wire Wire Line
 	1520 7140 1620 7140
-Text GLabel 1070 7140 0    60   Input ~ 0
-RB1
 Wire Wire Line
 	1070 7140 1220 7140
 Wire Wire Line
@@ -1603,46 +1471,92 @@ Wire Wire Line
 	3220 7490 3070 7490
 Wire Wire Line
 	3070 7490 3070 7390
-Text GLabel 2970 7590 0    60   Input ~ 0
-220N
 Wire Wire Line
 	2970 7590 3220 7590
 Wire Wire Line
 	3070 6430 3070 6680
-Text GLabel 3270 6430 2    60   Input ~ 0
-220F
 Wire Wire Line
 	8350 2160 8350 2060
 Wire Wire Line
 	8150 2060 8150 2160
 Wire Wire Line
 	8050 2160 8050 2060
-Wire Notes Line
-	3650 2300 1900 2300
-Wire Notes Line
-	1900 2300 1900 4300
-Wire Notes Line
-	1900 4300 3650 4300
-Wire Notes Line
-	3650 4300 3650 2300
-Text Notes 2450 3050 0    60   ~ 0
-PIC16F877
-Wire Notes Line
-	9350 1610 10450 1610
-Wire Notes Line
-	10450 1610 10450 2460
-Wire Notes Line
-	10450 2460 9350 2460
-Wire Notes Line
-	9350 2460 9350 1610
-Wire Wire Line
-	9500 2510 9500 2460
-Wire Wire Line
-	10300 2510 10300 2460
-Text Notes 9700 2010 0    60   ~ 0
-MAX6675
 Wire Wire Line
 	2620 6430 2620 6540
 Wire Wire Line
 	3070 6980 3070 7090
+Wire Wire Line
+	3950 4500 3300 4500
+Wire Wire Line
+	2600 4500 1950 4500
+Wire Wire Line
+	1900 4400 2600 4400
+Wire Wire Line
+	3900 3800 3300 3800
+Wire Wire Line
+	3300 3900 3900 3900
+Wire Wire Line
+	2100 3500 2600 3500
+Wire Wire Line
+	1950 4200 2600 4200
+Wire Wire Line
+	2450 4100 2600 4100
+Wire Wire Line
+	2000 4000 2600 4000
+Text GLabel 9700 1250 1    60   Input ~ 0
+TC+
+$Comp
+L C C11
+U 1 1 58DBE29C
+P 9900 1400
+F 0 "C11" H 9925 1500 50  0000 L CNN
+F 1 "~" H 9925 1300 50  0000 L CNN
+F 2 "" H 9938 1250 50  0000 C CNN
+F 3 "" H 9900 1400 50  0000 C CNN
+	1    9900 1400
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	9700 1600 9700 1400
+Wire Wire Line
+	9700 1400 9700 1250
+Wire Wire Line
+	9700 1400 9750 1400
+Connection ~ 9700 1400
+Wire Wire Line
+	10150 1250 10150 1400
+Wire Wire Line
+	10150 1400 10150 1600
+Wire Wire Line
+	10050 1400 10150 1400
+Connection ~ 10150 1400
+Text GLabel 10150 1250 1    60   Input ~ 0
+TC-
+Wire Wire Line
+	9450 2750 9450 2650
+$Comp
+L MAX6675 U?
+U 1 1 58EC553A
+P 9900 2150
+F 0 "U?" H 10478 2228 60  0000 L CNN
+F 1 "MAX6675" H 10478 2122 60  0000 L CNN
+F 2 "" H 9900 2150 60  0001 C CNN
+F 3 "" H 9900 2150 60  0001 C CNN
+	1    9900 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10350 2650 10350 2750
+Text GLabel 9700 2800 3    60   Input ~ 0
+CLK
+Wire Wire Line
+	9700 2800 9700 2650
+Text GLabel 9900 2800 3    60   Input ~ 0
+DO
+Text GLabel 10150 2800 3    60   Input ~ 0
+SO
+Wire Wire Line
+	10150 2800 10150 2650
+Wire Wire Line
+	9900 2800 9900 2650
 $EndSCHEMATC
