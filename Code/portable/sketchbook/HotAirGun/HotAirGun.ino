@@ -35,9 +35,9 @@
 #define		M_MaxT		9
 #define		M_MaxT1		10	
 
-#define EN_A 0 // Encored scroll A0
-#define EN_B 1 // Encoder scroll A1 
-#define EN_C 2 // Encoder click  A2
+#define EN_A 1 // Encored scroll A0
+#define EN_B 2 // Encoder scroll A1 
+#define EN_C 0 // Encoder click  A2
 #define BTN_NUM 5
 #define BTN_1 3 // Single button A3
 #define BTN_2 4 // Single button A4
