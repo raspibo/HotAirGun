@@ -836,7 +836,7 @@ void I2cControllerLib::setupEncoder(uint8_t en_a, uint8_t en_b, uint8_t en_c)  {
 void I2cControllerLib::setIntBtn(uint8_t pin)  {
 	pinMode(pin,INPUT);
 	pullUp(pin, HIGH);
-	setupInterruptPin(pin, CHANGE);
+	setupInterruptPin(pin, FALLING);
 }
 
 //Setup 5  buttons in cross disposition and interrupt handling
@@ -845,6 +845,6 @@ void I2cControllerLib::setIntCross(uint8_t btn[], uint8_t btnNum )  {
 	{
 		pinMode(btn[i],INPUT);
 		pullUp(btn[i], HIGH);
-		setupInterruptPin(btn[i], CHANGE);
+		setupInterruptPin(btn[i], FALLING);
 	}
 }	
