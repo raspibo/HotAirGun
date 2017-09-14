@@ -38,6 +38,7 @@
 #define EN_A 1 // Encored scroll A0
 #define EN_B 2 // Encoder scroll A1 
 #define EN_C 0 // Encoder click  A2
+#define POTDIVIDER 3 //Encoder tick divider for sensibilty regulation
 #define BTN_NUM 5
 #define BTN_1 3 // Single button A3
 #define BTN_2 4 // Single button A4
@@ -57,7 +58,8 @@ uint8_t controllerEvent=CONTR_NOEVENT;
 uint8_t encoderPos=0;
 uint8_t clickButton;
 int clickcount=0;
-//int PotDivider=0;
+int ticPot=0;       //Used for cont of single step of rotary encoder 
+int PotDivider=POTDIVIDER;   //Divider for ticPot for best regulation of sensitivity
 int Pot=0;
 int But;
 char ActEnc, OldEnc;
@@ -98,6 +100,9 @@ int menu=MENU_HOME;
 int menudec,menuunit;
 int menuold=-1;
 int ModVal;
+
+int nextEventTime=0;
+int actTime=0;
 
 /*
    First char convention for menu voice handling:
@@ -146,25 +151,36 @@ void handleInterrupt() {
 				bitWrite(ActEnc, 1,contr.digitalRead(EN_B)); //Read current value of pin and set ActEnc var
 				switch(ActEnc) {
 					case 0: //00
-						if(OldEnc==2) Pot++;  //10
-						if(OldEnc==1) Pot--;  //01
+						if(OldEnc==2) ticPot++;  //10
+						if(OldEnc==1) ticPot--;  //01
 						break;
 					case 1: //01
-						if(OldEnc==0) Pot++;  //00
-						if(OldEnc==3 ) Pot--;  //11
+						if(OldEnc==0) ticPot++;  //00
+						if(OldEnc==3 ) ticPot--;  //11
 						break;
 					case 2: //10
-						if(OldEnc==3) Pot++;  //11
-						if(OldEnc==0 ) Pot--;  //00
+						if(OldEnc==3) ticPot++;  //11
+						if(OldEnc==0 ) ticPot--;  //00
 						break;
 					case 3: // 11
-						if(OldEnc==1) Pot++;  //01
-						if(OldEnc==2 ) Pot--;  //10
+						if(OldEnc==1) ticPot++;  //01
+						if(OldEnc==2 ) ticPot--;  //10
 						break;
 				}
 				OldEnc=ActEnc;
-				Serial.print("Pot: ");
-				Serial.println(Pot);
+//				Serial.print("ticPot: ");
+//				Serial.println(ticPot);
+//				Serial.print("Pot: ");
+//				Serial.println(Pot);
+				if (ticPot >= PotDivider) {
+					Pot++;
+					ticPot=0;
+				} else if (ticPot <= -PotDivider)  {
+					Pot--;
+					ticPot=0;
+				} 
+//				Serial.print("Scaled ticPot: ");
+//				Serial.println(ticPot);
 				controllerEvent=CONTR_SCROLL;
 				break;
 			case EN_C:
@@ -334,6 +350,7 @@ void loop() {
 		}
 	} 
 	if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='h'){ //On menuvoice=Exit goto menu title
+		PotDivider=POTDIVIDER;	        //Restore value encoder tick divider for sensibilty regulation (modified in m voice handler)
 		saveParMenu();			//For specific voices save parameters on eeprom				
 		menu=MENU_HOME;
 		controllerEvent=CONTR_NOEVENT;
@@ -351,6 +368,7 @@ void loop() {
 		contr.print("Scroll for mod");
 	} 
 	if (controllerEvent==CONTR_SCROLL && menuvoice[menudec][menuunit][0]=='m'){ //For first letter menu voice=m (modify value) specific handler
+		PotDivider=1;                   //Set encoder divider for maximun sensibility, this speed value change (ie temp regulation)
 		modParMenu();
 		controllerEvent=CONTR_NOEVENT;
 	} else if (controllerEvent==CONTR_CLICK && menudec <= MENU_TITLES-1 ){
