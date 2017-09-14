@@ -38,7 +38,7 @@
 #define EN_A 1 // Encored scroll A0
 #define EN_B 2 // Encoder scroll A1 
 #define EN_C 0 // Encoder click  A2
-#define POTDIVIDER 3 //Encoder tick divider for sensibilty regulation
+#define POTDIVIDER 4 //Encoder tick divider for sensibilty regulation
 #define BTN_NUM 5
 #define BTN_1 3 // Single button A3
 #define BTN_2 4 // Single button A4
@@ -119,10 +119,10 @@ const char *menuvoice[MENU_TITLES][12]=
 	{"nSetFast"  		,"vAirTemp"	,"vAirFlow"	,"hExit"},							//10,11,12..
 	{"x"        		,"mModAirTemp"	,"mModAirFlow"	},								//20,21,22..
 	{"x"        		,"hSaveAirTemp"	,"hSaveAirFlow"	},								//30,31,32...
-	{"nSetPar"   		,"vKP"		,"vKI"		,"vKD"		,"vMinT"	,"vMaxT"	,"hExit"},	//40,41..
-	{"x"        		,"mMod KP"	,"mMod KI"	,"mMod KD"	,"mMod MinT"	,"mMod MaxT"	},		//50,51,52.....
-	{"x"        		,"hSave KP"	,"hSave KI"	,"hSave KD"	,"hSave MinT"	,"hSave MaxT"	},		//60...
-	{"nMaterials Presets"	,"aSn"		,"aheat shrink"	,"aPP"		,"hExit"},					//70..	
+	{"nSetPar"   		,"vKP"		,"vKI"		,"vKD"		,"vMinT"		,"vMaxT"		,"hExit"},	//40,41..
+	{"x"        		,"mMod KP"	,"mMod KI"	,"mMod KD"	,"mMod MinT"		,"mMod MaxT"		},		//50,51,52.....
+	{"x"        		,"hSave KP"	,"hSave KI"	,"hSave KD"	,"hSave MinT"		,"hSave MaxT"		},		//60...
+	{"nMaterials Presets"	,"aSn"		,"aheat shrink"	,"aLDPE"	,"aPP/Hard PVC/HDPE"	,"aABS/PC/Soft PVC"	,"hExit"},					//70..	
 	{"nFunct"		,"vAutoOFF"	,"vPPPreset"   	,"vDefault"	,"hExit"},					
 	{"x"			,"mModAutoOFF"	,"mModPPPreset"	,"mSure?"},
 	{"x"			,"hSaveAutoOFF"	,"hSavePPPreset","hSaveDefault"},
@@ -263,6 +263,17 @@ void saveParMenu() {
 		initPar=false;
 }
 
+void setMac() {
+		switch (menu) {
+			case 71: 	TempGun = 300;	AirFlow=80; break;           //Example for predefined temp and air flow for Sn
+			case 72: 	TempGun = 120;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function heat shrink tubing
+			case 73: 	TempGun = 270;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld LDPE 
+			case 74: 	TempGun = 300;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
+			case 75:	TempGun = 350;  AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
+		}  
+		initPar=false;
+		}
+
 void setup() {
 	Serial.begin(115200);
 	Serial.print("Startup");
@@ -356,10 +367,7 @@ void loop() {
 		controllerEvent=CONTR_NOEVENT;
 	} 
 	if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='a'){ //For first letter menu voice=a (apply predefined value) and go to home
-		switch (menu) {
-			case 72: 	TempGun = 120;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function heat shrink tubing
-		}  
-		initPar=false;
+		setMac();
 		menu=MENU_HOME;
 		controllerEvent=CONTR_NOEVENT;
 	} 
@@ -395,5 +403,4 @@ void loop() {
 
 //	delay(30);
 	}
-
 
