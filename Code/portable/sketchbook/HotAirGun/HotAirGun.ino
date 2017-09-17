@@ -92,7 +92,7 @@ boolean state;
 #define MENU_TITLES 12 
 boolean initPar=false;
 
-int ActTemp=25;		//Actual gun air temp
+int ActTemp=145;		//Actual gun air temp
 int TempGun=251;	//Target temperature for PID, at work the air flow with this temp from gun
 int AirFlow=100;
 
@@ -101,8 +101,11 @@ int menudec,menuunit;
 int menuold=-1;
 int ModVal;
 
+int opTime=0;		//operation Timer normally equal to millis(), used for temperature welding curve time calculation, displayed in home menu
 int nextEventTime=0;
 int actTime=0;
+uint8_t curveInd=0;     //operation index for tempCurve array
+boolean weldCycle=0;    //indicate if weld cycle temp is active
 
 /*
    First char convention for menu voice handling:
@@ -122,11 +125,36 @@ const char *menuvoice[MENU_TITLES][12]=
 	{"nSetPar"   		,"vKP"		,"vKI"		,"vKD"		,"vMinT"		,"vMaxT"		,"hExit"},	//40,41..
 	{"x"        		,"mMod KP"	,"mMod KI"	,"mMod KD"	,"mMod MinT"		,"mMod MaxT"		},		//50,51,52.....
 	{"x"        		,"hSave KP"	,"hSave KI"	,"hSave KD"	,"hSave MinT"		,"hSave MaxT"		},		//60...
-	{"nMaterials Presets"	,"aSn"		,"aheat shrink"	,"aLDPE"	,"aPP/Hard PVC/HDPE"	,"aABS/PC/Soft PVC"	,"hExit"},					//70..	
+	{"nMaterials Presets"	,"aSn"		,"aheat shrink"	,"aLDPE"	,"aPP/Hard PVC/HDPE"	,"aABS/PC/Soft PVC"	,"hExit"},	//70..	
+	{"nWeldCurve"		,"aTempCurve"	,"hExit"},											//80..	
 	{"nFunct"		,"vAutoOFF"	,"vPPPreset"   	,"vDefault"	,"hExit"},					
 	{"x"			,"mModAutoOFF"	,"mModPPPreset"	,"mSure?"},
 	{"x"			,"hSaveAutoOFF"	,"hSavePPPreset","hSaveDefault"},
 };
+
+/*
+
+tempCurve var 
+
+	|           _______________<time
+	|         / ^target        \
+	|  ______/<time             \
+	| /   ^target
+	|/
+	L--------------------------
+Set the themperature to a certain value.
+Calculate next event time and set it.
+
+const uint8_t tempCurve[]={target,time,target,time};    
+*/	
+
+const uint8_t tempCurve[]={     //target temp   //time to mantain temp
+				150,			6,		//prehot
+				155,			4,		//weld temp
+				150,			5,		
+				180	
+			  };    
+
 
 char menuDisplay[16] = "";
 
@@ -192,9 +220,17 @@ void handleInterrupt() {
 				}
 				break;
 			default:
+				if (millis() > LcdUpd+1000) {
 				Serial.print("Button: A");
 				Serial.println(uint8_tPin);
 				controllerEvent=CONTR_BTN;
+				if (uint8_tPin==4) { //Only for debug purpose simulate temp change
+					ActTemp--;   //Only for debug purpose simulate temp change
+				}                    //Only for debug purpose simulate temp change
+                                if (uint8_tPin==6) { //Only for debug purpose simulate temp change
+                                        ActTemp++;   //Only for debug purpose simulate temp change
+                                }                    //Only for debug purpose simulate temp change
+				}
 				break;
 		}
 
@@ -270,8 +306,35 @@ void setMac() {
 			case 73: 	TempGun = 270;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld LDPE 
 			case 74: 	TempGun = 300;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
 			case 75:	TempGun = 350;  AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
+			
+			case 81:	weldCycle=1;	break;			     //Set weldCycle var now at every loop weldCurve routine is checked to the end of temperature weld cycle
 		}  
 		initPar=false;
+		}
+
+void weldCurve() {
+			if (curveInd%2==0) {					     //If even element of array set temp
+			//	Serial.println("set temp");
+				TempGun = tempCurve[curveInd];
+			//	Serial.println(curveInd);
+			}; 
+			if (curveInd%2==0 && ActTemp==TempGun) { 		    //If temp reached increment index
+				Serial.println("Temp reached ==> Set Time");
+				curveInd++;
+				opTime=tempCurve[curveInd];
+			//	Serial.println(curveInd);
+                        }
+			if (ActTemp==TempGun && opTime<=0) {
+			//if (opTime==0) {
+				Serial.println("Time reached");
+				curveInd++;
+			}
+			if (curveInd>=sizeof(tempCurve)) {
+				curveInd=0;
+				weldCycle=0;
+				menu=0;
+				Serial.println("Weld curve end");
+			}
 		}
 
 void setup() {
@@ -349,7 +412,9 @@ void loop() {
 		contr.print(AirFlow);
 		contr.print("%");
 		contr.setCursor(0, 1);
-		contr.print(millis()/1000);
+		contr.print("t:");
+		contr.print(opTime);
+                opTime--;
 		LcdUpd=millis();
 	} 
 
@@ -387,8 +452,8 @@ void loop() {
 
 
 	if (controllerEvent==CONTR_SCROLL && menu > 0 ){
-		Serial.print("Menu:");
-		Serial.println(menu);
+		//Serial.print("Menu:");
+		//Serial.println(menu);
 		//if (menuunit < 4 && Pot==+1) {   //scorre solo fino all'ultima voce del menu
 		if (menuvoice[menudec][menuunit][0]!='h' && Pot==+1) {   //scorre solo fino all'ultima voce del menu
 			menu=Pot+menu;
@@ -400,6 +465,9 @@ void loop() {
 		//Serial.println(menu);
 		controllerEvent=CONTR_NOEVENT;
 	};
+	if (weldCycle>0) {  //Check if weld temperature cycle is active and then invoke it
+		weldCurve();
+	}
 
 //	delay(30);
 	}
