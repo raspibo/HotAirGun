@@ -20,6 +20,7 @@
 #define		ParMin			0
 #define		D_Min_Pid		0
 #define		D_Max_Pid		100
+#define		D_AutoOffTime	-3600
 
 #define		LCD_Update	100
 #define		PID_Update	100
@@ -34,6 +35,8 @@
 #define		M_MinT		8
 #define		M_MaxT		9
 #define		M_MaxT1		10	
+#define		M_AutoOffTime   11	
+#define		M_AutoOffTime1  12	
 
 #define EN_A 1 // Encored scroll A0
 #define EN_B 2 // Encoder scroll A1 
@@ -66,8 +69,8 @@ char ActEnc, OldEnc;
 
 
 // Interrupts from the MCP will be handled by this PIN on Arduino
-byte arduinoIntPin = 3;
-// ... and this uint8_terrupt vector
+byte MCPIntPin = 3;
+// ... and this intterrupt vector
 byte arduinoInterrupt = 1;
 
 volatile boolean awakenByInterrupt = false;
@@ -80,6 +83,7 @@ boolean ModPar, MModPar, GetVal;
 
 int MaxT = 0;
 int MinT = 30;
+int AutoOffTime;
 
 char KI, KD, KP;
 double DActTemp, DPidOut , DTempGun;
@@ -107,6 +111,7 @@ int actTime=0;
 uint8_t curveInd=0;     //operation index for tempCurve array
 boolean weldCycle=0;    //indicate if weld cycle temp is active
 
+int X=0;
 /*
    First char convention for menu voice handling:
    x=empty voice -> skip next level or (for last) home
@@ -127,9 +132,9 @@ const char *menuvoice[MENU_TITLES][12]=
 	{"x"        		,"hSave KP"	,"hSave KI"	,"hSave KD"	,"hSave MinT"		,"hSave MaxT"		},		//60...
 	{"nMaterials Presets"	,"aSn"		,"aheat shrink"	,"aLDPE"	,"aPP/Hard PVC/HDPE"	,"aABS/PC/Soft PVC"	,"hExit"},	//70..	
 	{"nWeldCurve"		,"aTempCurve"	,"hExit"},											//80..	
-	{"nFunct"		,"vAutoOFF"	,"vPPPreset"   	,"vDefault"	,"hExit"},					
-	{"x"			,"mModAutoOFF"	,"mModPPPreset"	,"mSure?"},
-	{"x"			,"hSaveAutoOFF"	,"hSavePPPreset","hSaveDefault"},
+	{"nFunct"		,"vAutoOff"	,"vPPPreset"   	,"vDefault"	,"hExit"},							//90..	
+	{"x"			,"mAutoOffTime"	,"mPPPreset"	,"mSure?"},									//100..
+	{"x"			,"hSaveAutoOff"	,"hSavePPPreset","hSaveDefault"},								//110..
 };
 
 /*
@@ -151,8 +156,8 @@ const uint8_t tempCurve[]={target,time,target,time};
 const uint8_t tempCurve[]={     //target temp   //time to mantain temp
 				150,			6,		//prehot
 				155,			4,		//weld temp
-				150,			5,		
-				180	
+				150,			5,	        //weld temp	
+				180	                                //temperature after welding
 			  };    
 
 
@@ -240,11 +245,11 @@ void handleInterrupt() {
 	lastMillisInterrupt=millis();
 	cleanInterrupts();
 	//we set callback for the arduino INT handler.
-	attachInterrupt(arduinoInterrupt, uint8_tCallBack, FALLING);
+	attachInterrupt(arduinoInterrupt, MCPintCallBack, FALLING);
 }
 
 
-void uint8_tCallBack() {
+void MCPintCallBack() {
 	awakenByInterrupt = true;
 }
 
@@ -263,6 +268,7 @@ void modParMenu() {
 			case 53:	ModVal  = KD;		break;
 			case 54:	ModVal  = MinT;		break;
 			case 55:	ModVal  = MaxT;		break;
+			case 101:	ModVal  = AutoOffTime;	break;
 		}  
 		initPar=true; 
 		contr.setCursor(0, 1);
@@ -270,13 +276,13 @@ void modParMenu() {
 	}else {		                //Second: check if value is valid
 		ModVal=ModVal+Pot;
 		switch (menu) {
-			case 21:	if (ModVal  > D_MaxT) ModVal=D_MaxT ;	break;
+			case 21:	if (ModVal  < 30) ModVal=30 ; if (ModVal  > D_MaxT) ModVal=D_MaxT ;	break;
 			case 22:	if (ModVal  < D_AirFlowMin) { ModVal= D_AirFlowMin; };  if (ModVal > D_AirFlowMax) {ModVal = D_AirFlowMax;}; break;
 			case 51:	if (ModVal  < D_Min_Pid) { ModVal= D_Min_Pid; };  if (ModVal > D_Max_Pid) {ModVal = D_Max_Pid;}; break;
 			case 52:	if (ModVal  < D_Min_Pid) { ModVal= D_Min_Pid; };  if (ModVal > D_Max_Pid) {ModVal = D_Max_Pid;}; break;
 			case 53:	if (ModVal  < D_Min_Pid) { ModVal= D_Min_Pid; };  if (ModVal > D_Max_Pid) {ModVal = D_Max_Pid;}; break;
-			case 54:	ModVal  = MinT;		break;
-			case 55:	ModVal  = MaxT;		break;
+			case 54:	if (ModVal  < 30) ModVal=30 ; if (ModVal  > D_MaxT) ModVal=D_MaxT ;	break;
+			case 55:	if (ModVal  < 30) ModVal=30 ; if (ModVal  > D_MaxT) ModVal=D_MaxT ;	break;
 		}		
 	} 
 	contr.setCursor(5, 1);
@@ -294,7 +300,8 @@ void saveParMenu() {
 			case 62: 	KI 	= ModVal;  	EEPROM.write(M_KI, KI);			break;
 			case 63: 	KD 	= ModVal;	EEPROM.write(M_KD, KD);			break;
 			case 64: 	MinT 	= ModVal;  	EEPROM.write(M_MinT, MinT);		break;
-			case 65: 	MaxT 	= ModVal;   	EEPROM.write(M_MaxT, MaxT);   		EEPROM.write(M_MaxT1, (MaxT >> 8));     break;
+			case 65: 	MaxT 	= ModVal;   	EEPROM.write(M_MaxT, MaxT);   				EEPROM.write(M_MaxT1, (MaxT >> 8));     		break;
+			case 111: 	AutoOffTime= ModVal;   	EEPROM.write(M_AutoOffTime, AutoOffTime);   		EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8));	break;
 		}  
 		initPar=false;
 }
@@ -362,6 +369,8 @@ void setup() {
 	MinT = EEPROM.read(M_MinT);
 	MaxT = EEPROM.read(M_MaxT1);
 	MaxT = (MaxT << 8) + EEPROM.read(M_MaxT);
+	AutoOffTime = EEPROM.read(M_AutoOffTime1);
+	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
 	if (TempGun > D_MaxT) TempGun = D_MaxT;
 	if (AirFlow < D_AirFlow) AirFlow = D_AirFlow;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -381,8 +390,8 @@ void setup() {
 	//contr.setupInterruptPin(BTN_1, FALLING); //Use this if you want receive continuos uint8_terrupt on button pressed. Useful ??
 	uint8_t btnCross[BTN_NUM] = { BTN_1, BTN_2, BTN_3, BTN_4, BTN_5}; // Five button on cross disposition, setup function
 	contr.setIntCross(btnCross, BTN_NUM);
-	//attachInterrupt(arduinoInterrupt, uint8_tCallBack, FALLING);
-	attachInterrupt(digitalPinToInterrupt(arduinoIntPin), uint8_tCallBack, FALLING);
+	//attachInterrupt(arduinoInterrupt, MCPintCallBack, FALLING);
+	attachInterrupt(digitalPinToInterrupt(MCPIntPin), MCPintCallBack, FALLING);
 	delay(1000);
 	//Force uint8_terrupt handling for clean startup
 	handleInterrupt();
@@ -412,8 +421,7 @@ void loop() {
 		contr.print(AirFlow);
 		contr.print("%");
 		contr.setCursor(0, 1);
-		contr.print("t:");
-		contr.print(opTime);
+		if (weldCycle>0) { contr.print("t:"); contr.print(opTime); }
                 opTime--;
 		LcdUpd=millis();
 	} 
@@ -467,6 +475,12 @@ void loop() {
 	};
 	if (weldCycle>0) {  //Check if weld temperature cycle is active and then invoke it
 		weldCurve();
+	}
+
+	if (opTime<D_AutoOffTime) {  //Shutdown if inactive, other settings are required.....
+		TempGun=0;
+		contr.setCursor(0, 1);
+                contr.print("Auto Power OFF");
 	}
 
 //	delay(30);
