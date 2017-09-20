@@ -1,8 +1,3 @@
-/*
-   From https://github.com/lincomatic/I2cControllerLib
-   and http://blog.think3dprint3d.com/2012/12/mcp23017-i2c.html
- */
-
 // include the library code:
 #include <Wire.h>
 #include <I2cController.h>
@@ -55,6 +50,11 @@
 #define CONTR_CLICK  2 // Encoder click detected 
 #define CONTR_BTN    3 // Button pressed
 
+#define DEBUGLED     13 //Led used for debug purpose
+#define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
+#define sbi(port,bit) (port)|=(1<<(bit))
+int lstate = 0;
+
 // Connect via i2c, default address #0 (A0-A2 not jumpered)
 I2cControllerLib contr(0x20);
 uint8_t controllerEvent=CONTR_NOEVENT;
@@ -71,9 +71,14 @@ char ActEnc, OldEnc;
 // Interrupts from the MCP will be handled by this PIN on Arduino
 byte MCPIntPin = 3;
 // ... and this intterrupt vector
-byte arduinoInterrupt = 1;
+byte arduinoMCPInterrupt = 1;
 
-volatile boolean awakenByInterrupt = false;
+// Interrupts from zero crossing circuit
+byte ZeroCIntPin = 2;
+// ... and this intterrupt vector
+byte arduinoZeroCInterrupt = 0;
+
+volatile boolean awakenByMCPInterrupt   = false;
 unsigned long lastMillisInterrupt = 0;
 
 uint8_t LcdPot, HLcdPot;
@@ -163,9 +168,9 @@ const uint8_t tempCurve[]={     //target temp   //time to mantain temp
 
 char menuDisplay[16] = "";
 
-void handleInterrupt() {
 
-	detachInterrupt(arduinoInterrupt);
+void handleMCPInterrupt() {
+	detachInterrupt(arduinoMCPInterrupt);
 //	if (millis()>lastMillisInterrupt+5) {
 		//A    |¯¯|__|¯¯|__|¯
 		//B  - __|¯¯|__|¯¯|__  +
@@ -229,10 +234,10 @@ void handleInterrupt() {
 				Serial.print("Button: A");
 				Serial.println(uint8_tPin);
 				controllerEvent=CONTR_BTN;
-				if (uint8_tPin==4) { //Only for debug purpose simulate temp change
+				if (intPin==4) { //Only for debug purpose simulate temp change
 					ActTemp--;   //Only for debug purpose simulate temp change
 				}                    //Only for debug purpose simulate temp change
-                                if (uint8_tPin==6) { //Only for debug purpose simulate temp change
+                                if (intPin==6) { //Only for debug purpose simulate temp change
                                         ActTemp++;   //Only for debug purpose simulate temp change
                                 }                    //Only for debug purpose simulate temp change
 				}
@@ -243,20 +248,28 @@ void handleInterrupt() {
 
 
 	lastMillisInterrupt=millis();
-	cleanInterrupts();
+	cleanMCPInterrupts();
 	//we set callback for the arduino INT handler.
-	attachInterrupt(arduinoInterrupt, MCPintCallBack, FALLING);
+	attachInterrupt(arduinoMCPInterrupt, MCPintCallBack, FALLING);
 }
 
 
 void MCPintCallBack() {
-	awakenByInterrupt = true;
+	awakenByMCPInterrupt = true;
 }
 
-void cleanInterrupts() {
-	EIFR = 0x01;
-	awakenByInterrupt = false;
+void cleanMCPInterrupts() {
+	//EIFR = 0x01;
+	awakenByMCPInterrupt = false;
 }
+
+void ZeroCCallBack() {
+	detachInterrupt(arduinoZeroCInterrupt);
+	sbi(PINB,5);           		//Defined by macro on top for fast toggle pin D13 = DEBUGLED
+	//we set callback for the arduino INT handler.
+	attachInterrupt(arduinoZeroCInterrupt, ZeroCCallBack, FALLING);
+}
+
 
 void modParMenu() {
 	if (!initPar){		        //First: set Modval with actual value of parameter
@@ -321,18 +334,13 @@ void setMac() {
 
 void weldCurve() {
 			if (curveInd%2==0) {					     //If even element of array set temp
-			//	Serial.println("set temp");
 				TempGun = tempCurve[curveInd];
-			//	Serial.println(curveInd);
-			}; 
+			} 
 			if (curveInd%2==0 && ActTemp==TempGun) { 		    //If temp reached increment index
-				Serial.println("Temp reached ==> Set Time");
 				curveInd++;
 				opTime=tempCurve[curveInd];
-			//	Serial.println(curveInd);
-                        }
+			}
 			if (ActTemp==TempGun && opTime<=0) {
-			//if (opTime==0) {
 				Serial.println("Time reached");
 				curveInd++;
 			}
@@ -382,33 +390,28 @@ void setup() {
 	if (MinT < D_MinT) MinT = D_MinT;
 	if (MaxT > D_MaxT) MaxT = D_MaxT;
 
-//	for (uint8_t count = 0; count < 16; count++) {
-//		contr.pinMode(count, OUTPUT);
-//	}
 	contr.setupEncoder(EN_A,EN_B,EN_C); // Encoder setup 
-	//	contr.setIntBtn(BTN_1);                 // Single button setup
-	//contr.setupInterruptPin(BTN_1, FALLING); //Use this if you want receive continuos uint8_terrupt on button pressed. Useful ??
 	uint8_t btnCross[BTN_NUM] = { BTN_1, BTN_2, BTN_3, BTN_4, BTN_5}; // Five button on cross disposition, setup function
 	contr.setIntCross(btnCross, BTN_NUM);
-	//attachInterrupt(arduinoInterrupt, MCPintCallBack, FALLING);
-	attachInterrupt(digitalPinToInterrupt(MCPIntPin), MCPintCallBack, FALLING);
 	delay(1000);
-	//Force uint8_terrupt handling for clean startup
-	handleInterrupt();
-	//Force Home menu after initial splash screen
-	//controllerEvent=CONTR_CLICK;
+	attachInterrupt(digitalPinToInterrupt(ZeroCIntPin), ZeroCCallBack,  FALLING);
+	attachInterrupt(digitalPinToInterrupt(MCPIntPin),   MCPintCallBack, FALLING);
+	interrupts();
+	handleMCPInterrupt();
+	
 	menu=MENU_HOME;
+	pinMode(DEBUGLED, OUTPUT);
+	pinMode(DEBUGPIN, OUTPUT);
 }
 
 void loop() {
-	if (awakenByInterrupt) handleInterrupt();
+
+	if (awakenByMCPInterrupt) handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 
 	if (menu!=menuold) {
 		contr.clear();
 		menudec=menu/10;
 		menuunit=menu%10;
-		//contr.print(menu);
-		//contr.setCursor(4, 0);
 		contr.print(&menuvoice[menudec][menuunit][1]);  //Start printing lcd from second char to hide first menu control char
 		menuold=menu;
 	} else if (menu==0 && millis() > LcdUpd+1000) {         //Home menu special handler for live update var every second
@@ -454,23 +457,17 @@ void loop() {
 		controllerEvent=CONTR_NOEVENT;
 	} else if (controllerEvent==CONTR_CLICK && menudec <= MENU_TITLES-1 ){
 		menu=menu+10;
-		//Serial.println(menuvoice[menudec][menuunit]);
 		controllerEvent=CONTR_NOEVENT;
 	} 
 
 
 	if (controllerEvent==CONTR_SCROLL && menu > 0 ){
-		//Serial.print("Menu:");
-		//Serial.println(menu);
-		//if (menuunit < 4 && Pot==+1) {   //scorre solo fino all'ultima voce del menu
 		if (menuvoice[menudec][menuunit][0]!='h' && Pot==+1) {   //scorre solo fino all'ultima voce del menu
 			menu=Pot+menu;
 		} else if (menuunit>0 && Pot==-1) {  //torna indietro ruotando la rotella solo però fino alla  prima voce
 			menu=Pot+menu;
 		}
 		Pot=0;
-		//Serial.print("Menu:");
-		//Serial.println(menu);
 		controllerEvent=CONTR_NOEVENT;
 	};
 	if (weldCycle>0) {  //Check if weld temperature cycle is active and then invoke it
@@ -480,9 +477,6 @@ void loop() {
 	if (opTime<D_AutoOffTime) {  //Shutdown if inactive, other settings are required.....
 		TempGun=0;
 		contr.setCursor(0, 1);
-                contr.print("Auto Power OFF");
+		contr.print("Auto Power OFF");
 	}
-
-//	delay(30);
-	}
-
+}
