@@ -144,26 +144,26 @@ const char *menuvoice[MENU_TITLES][12]=
 
 /*
 
-tempCurve var 
+   tempCurve var 
 
-	|           _______________<time
-	|         / ^target        \
-	|  ______/<time             \
-	| /   ^target
-	|/
-	L--------------------------
-Set the themperature to a certain value.
-Calculate next event time and set it.
+   |           _______________<time
+   |         / ^target        \
+   |  ______/<time             \
+   | /   ^target
+   |/
+   L--------------------------
+   Set the themperature to a certain value.
+   Calculate next event time and set it.
 
-const uint8_t tempCurve[]={target,time,target,time};    
-*/	
+   const uint8_t tempCurve[]={target,time,target,time};    
+ */	
 
 const uint8_t tempCurve[]={     //target temp   //time to mantain temp
-				150,			6,		//prehot
-				155,			4,		//weld temp
-				150,			5,	        //weld temp	
-				180	                                //temperature after welding
-			  };    
+	150,			6,		//prehot
+	155,			4,		//weld temp
+	150,			5,	        //weld temp	
+	180	                                //temperature after welding
+};    
 
 
 char menuDisplay[16] = "";
@@ -171,80 +171,80 @@ char menuDisplay[16] = "";
 
 void handleMCPInterrupt() {
 	detachInterrupt(arduinoMCPInterrupt);
-//	if (millis()>lastMillisInterrupt+5) {
-		//A    |¯¯|__|¯¯|__|¯
-		//B  - __|¯¯|__|¯¯|__  +
-		// Nel canale A pin D3 condensatore ceramico 103K 10nF
-		uint8_t ActEnc=0;
-		uint8_t uint8_tPin=contr.getLastInterruptPin();
-		uint8_t valPin=contr.getLastInterruptPinValue();
-		//Serial.print("uint8_tPin: ");
-		//Serial.print(uint8_tPin);
-		//Switch che  decide come gestire uint8_terrupt in base al pin che lo ha generato se A0 o A1 uint8_terpreta encoder altrimenti uint8_terpretazione come pulsante
-		switch(uint8_tPin) {
-			case EN_A:
-			case EN_B:
-				Pot=0;
-				bitWrite(ActEnc, 0,contr.digitalRead(EN_A)); //Read current value of pin and set ActEnc var
-				bitWrite(ActEnc, 1,contr.digitalRead(EN_B)); //Read current value of pin and set ActEnc var
-				switch(ActEnc) {
-					case 0: //00
-						if(OldEnc==2) ticPot++;  //10
-						if(OldEnc==1) ticPot--;  //01
-						break;
-					case 1: //01
-						if(OldEnc==0) ticPot++;  //00
-						if(OldEnc==3 ) ticPot--;  //11
-						break;
-					case 2: //10
-						if(OldEnc==3) ticPot++;  //11
-						if(OldEnc==0 ) ticPot--;  //00
-						break;
-					case 3: // 11
-						if(OldEnc==1) ticPot++;  //01
-						if(OldEnc==2 ) ticPot--;  //10
-						break;
-				}
-				OldEnc=ActEnc;
-//				Serial.print("ticPot: ");
-//				Serial.println(ticPot);
-//				Serial.print("Pot: ");
-//				Serial.println(Pot);
-				if (ticPot >= PotDivider) {
-					Pot++;
-					ticPot=0;
-				} else if (ticPot <= -PotDivider)  {
-					Pot--;
-					ticPot=0;
-				} 
-//				Serial.print("Scaled ticPot: ");
-//				Serial.println(ticPot);
-				controllerEvent=CONTR_SCROLL;
-				break;
-			case EN_C:
-				if (valPin) {
-					Serial.print("click ");
-					controllerEvent=CONTR_CLICK;
-					clickcount++;
-					Serial.println(clickcount);
-				}
-				break;
-			default:
-				if (millis() > LcdUpd+1000) {
+	//	if (millis()>lastMillisInterrupt+5) {
+	//A    |¯¯|__|¯¯|__|¯
+	//B  - __|¯¯|__|¯¯|__  +
+	// Nel canale A pin D3 condensatore ceramico 103K 10nF
+	uint8_t ActEnc=0;
+	uint8_t intPin=contr.getLastInterruptPin();
+	uint8_t valPin=contr.getLastInterruptPinValue();
+	//Serial.print("uint8_tPin: ");
+	//Serial.print(uint8_tPin);
+	//Switch che  decide come gestire uint8_terrupt in base al pin che lo ha generato se A0 o A1 uint8_terpreta encoder altrimenti uint8_terpretazione come pulsante
+	switch(intPin) {
+		case EN_A:
+		case EN_B:
+			Pot=0;
+			bitWrite(ActEnc, 0,contr.digitalRead(EN_A)); //Read current value of pin and set ActEnc var
+			bitWrite(ActEnc, 1,contr.digitalRead(EN_B)); //Read current value of pin and set ActEnc var
+			switch(ActEnc) {
+				case 0: //00
+					if(OldEnc==2) ticPot++;  //10
+					if(OldEnc==1) ticPot--;  //01
+					break;
+				case 1: //01
+					if(OldEnc==0) ticPot++;  //00
+					if(OldEnc==3 ) ticPot--;  //11
+					break;
+				case 2: //10
+					if(OldEnc==3) ticPot++;  //11
+					if(OldEnc==0 ) ticPot--;  //00
+					break;
+				case 3: // 11
+					if(OldEnc==1) ticPot++;  //01
+					if(OldEnc==2 ) ticPot--;  //10
+					break;
+			}
+			OldEnc=ActEnc;
+			//				Serial.print("ticPot: ");
+			//				Serial.println(ticPot);
+			//				Serial.print("Pot: ");
+			//				Serial.println(Pot);
+			if (ticPot >= PotDivider) {
+				Pot++;
+				ticPot=0;
+			} else if (ticPot <= -PotDivider)  {
+				Pot--;
+				ticPot=0;
+			} 
+			//				Serial.print("Scaled ticPot: ");
+			//				Serial.println(ticPot);
+			controllerEvent=CONTR_SCROLL;
+			break;
+		case EN_C:
+			if (valPin) {
+				Serial.print("click ");
+				controllerEvent=CONTR_CLICK;
+				clickcount++;
+				Serial.println(clickcount);
+			}
+			break;
+		default:
+			if (millis() > LcdUpd+1000) {
 				Serial.print("Button: A");
-				Serial.println(uint8_tPin);
+				Serial.println(intPin);
 				controllerEvent=CONTR_BTN;
 				if (intPin==4) { //Only for debug purpose simulate temp change
 					ActTemp--;   //Only for debug purpose simulate temp change
 				}                    //Only for debug purpose simulate temp change
-                                if (intPin==6) { //Only for debug purpose simulate temp change
-                                        ActTemp++;   //Only for debug purpose simulate temp change
-                                }                    //Only for debug purpose simulate temp change
-				}
-				break;
-		}
+				if (intPin==6) { //Only for debug purpose simulate temp change
+					ActTemp++;   //Only for debug purpose simulate temp change
+				}                    //Only for debug purpose simulate temp change
+			}
+			break;
+	}
 
-//	}
+	//	}
 
 
 	lastMillisInterrupt=millis();
@@ -306,51 +306,51 @@ void modParMenu() {
 	contr.print(ModVal);
 }
 void saveParMenu() {
-		switch (menu) {		//Third: save valid modified parameter on eeprom
-			case 31: 	TempGun = ModVal;	EEPROM.write(M_Temp, TempGun); 		EEPROM.write(M_Temp1, (TempGun >> 8));	break;
-			case 32: 	AirFlow = ModVal;	EEPROM.write(M_AirFlow, AirFlow); 	break;
-			case 61: 	KP 	= ModVal;	EEPROM.write(M_KP, KP);			break;
-			case 62: 	KI 	= ModVal;  	EEPROM.write(M_KI, KI);			break;
-			case 63: 	KD 	= ModVal;	EEPROM.write(M_KD, KD);			break;
-			case 64: 	MinT 	= ModVal;  	EEPROM.write(M_MinT, MinT);		break;
-			case 65: 	MaxT 	= ModVal;   	EEPROM.write(M_MaxT, MaxT);   				EEPROM.write(M_MaxT1, (MaxT >> 8));     		break;
-			case 111: 	AutoOffTime= ModVal;   	EEPROM.write(M_AutoOffTime, AutoOffTime);   		EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8));	break;
-		}  
-		initPar=false;
+	switch (menu) {		//Third: save valid modified parameter on eeprom
+		case 31: 	TempGun = ModVal;	EEPROM.write(M_Temp, TempGun); 		EEPROM.write(M_Temp1, (TempGun >> 8));	break;
+		case 32: 	AirFlow = ModVal;	EEPROM.write(M_AirFlow, AirFlow); 	break;
+		case 61: 	KP 	= ModVal;	EEPROM.write(M_KP, KP);			break;
+		case 62: 	KI 	= ModVal;  	EEPROM.write(M_KI, KI);			break;
+		case 63: 	KD 	= ModVal;	EEPROM.write(M_KD, KD);			break;
+		case 64: 	MinT 	= ModVal;  	EEPROM.write(M_MinT, MinT);		break;
+		case 65: 	MaxT 	= ModVal;   	EEPROM.write(M_MaxT, MaxT);   				EEPROM.write(M_MaxT1, (MaxT >> 8));     		break;
+		case 111: 	AutoOffTime= ModVal;   	EEPROM.write(M_AutoOffTime, AutoOffTime);   		EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8));	break;
+	}  
+	initPar=false;
 }
 
 void setMac() {
-		switch (menu) {
-			case 71: 	TempGun = 300;	AirFlow=80; break;           //Example for predefined temp and air flow for Sn
-			case 72: 	TempGun = 120;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function heat shrink tubing
-			case 73: 	TempGun = 270;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld LDPE 
-			case 74: 	TempGun = 300;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
-			case 75:	TempGun = 350;  AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
-			
-			case 81:	weldCycle=1;	break;			     //Set weldCycle var now at every loop weldCurve routine is checked to the end of temperature weld cycle
-		}  
-		initPar=false;
-		}
+	switch (menu) {
+		case 71: 	TempGun = 300;	AirFlow=80; break;           //Example for predefined temp and air flow for Sn
+		case 72: 	TempGun = 120;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function heat shrink tubing
+		case 73: 	TempGun = 270;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld LDPE 
+		case 74: 	TempGun = 300;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
+		case 75:	TempGun = 350;  AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
+
+		case 81:	weldCycle=1;	break;			     //Set weldCycle var now at every loop weldCurve routine is checked to the end of temperature weld cycle
+	}  
+	initPar=false;
+}
 
 void weldCurve() {
-			if (curveInd%2==0) {					     //If even element of array set temp
-				TempGun = tempCurve[curveInd];
-			} 
-			if (curveInd%2==0 && ActTemp==TempGun) { 		    //If temp reached increment index
-				curveInd++;
-				opTime=tempCurve[curveInd];
-			}
-			if (ActTemp==TempGun && opTime<=0) {
-				Serial.println("Time reached");
-				curveInd++;
-			}
-			if (curveInd>=sizeof(tempCurve)) {
-				curveInd=0;
-				weldCycle=0;
-				menu=0;
-				Serial.println("Weld curve end");
-			}
-		}
+	if (curveInd%2==0) {					     //If even element of array set temp
+		TempGun = tempCurve[curveInd];
+	} 
+	if (curveInd%2==0 && ActTemp==TempGun) { 		    //If temp reached increment index
+		curveInd++;
+		opTime=tempCurve[curveInd];
+	}
+	if (ActTemp==TempGun && opTime<=0) {
+		Serial.println("Time reached");
+		curveInd++;
+	}
+	if (curveInd>=sizeof(tempCurve)) {
+		curveInd=0;
+		weldCycle=0;
+		menu=0;
+		Serial.println("Weld curve end");
+	}
+}
 
 void setup() {
 	Serial.begin(115200);
@@ -398,7 +398,7 @@ void setup() {
 	attachInterrupt(digitalPinToInterrupt(MCPIntPin),   MCPintCallBack, FALLING);
 	interrupts();
 	handleMCPInterrupt();
-	
+
 	menu=MENU_HOME;
 	pinMode(DEBUGLED, OUTPUT);
 	pinMode(DEBUGPIN, OUTPUT);
@@ -425,7 +425,7 @@ void loop() {
 		contr.print("%");
 		contr.setCursor(0, 1);
 		if (weldCycle>0) { contr.print("t:"); contr.print(opTime); }
-                opTime--;
+		opTime--;
 		LcdUpd=millis();
 	} 
 
