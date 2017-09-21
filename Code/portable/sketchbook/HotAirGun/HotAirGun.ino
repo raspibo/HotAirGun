@@ -50,6 +50,10 @@
 #define CONTR_CLICK  2 // Encoder click detected 
 #define CONTR_BTN    3 // Button pressed
 
+
+#define P_FAN_PWM 10   //Define pin D10 for pwm signal for gun
+
+
 #define DEBUGLED     13 //Led used for debug purpose
 #define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
 #define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
@@ -394,12 +398,18 @@ void setup() {
 	menu=MENU_HOME;
 	pinMode(DEBUGLED, OUTPUT);
 	pinMode(DEBUGPIN, OUTPUT);
+	pinMode(P_FAN_PWM, OUTPUT);
+	//Set TMR1 for PWM at 16 MHz
+	TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
+	TCCR1B = _BV(CS12);
 }
 
 void loop() {
 
 	if (awakenByMCPInterrupt) handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
-
+	
+	OCR1B =map(AirFlow,0,100,0,1023);
+	
 	if (menu!=menuold) {
 		contr.clear();
 		menudec=menu/10;
@@ -470,5 +480,9 @@ void loop() {
 		TempGun=0;
 		contr.setCursor(0, 1);
 		contr.print("Auto Power OFF");
+		if (ActTemp<=40) {
+			AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
+		}
 	}
+
 }
