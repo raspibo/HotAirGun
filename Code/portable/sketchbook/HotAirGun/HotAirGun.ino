@@ -37,7 +37,7 @@
 #define EN_B 2 // Encoder scroll A1 
 #define EN_C 0 // Encoder click  A2
 #define POTDIVIDER 4 //Encoder tick divider for sensibilty regulation
-#define BTN_NUM 5
+#define BTN_NUM 5 // Number of buttons
 #define BTN_1 3 // Single button A3
 #define BTN_2 4 // Single button A4
 #define BTN_3 5 // Single button A5
@@ -52,7 +52,7 @@
 
 #define DEBUGLED     13 //Led used for debug purpose
 #define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
-#define sbi(port,bit) (port)|=(1<<(bit))
+#define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
 int lstate = 0;
 
 // Connect via i2c, default address #0 (A0-A2 not jumpered)
@@ -78,7 +78,7 @@ byte ZeroCIntPin = 2;
 // ... and this intterrupt vector
 byte arduinoZeroCInterrupt = 0;
 
-volatile boolean awakenByMCPInterrupt   = false;
+volatile boolean awakenByMCPInterrupt   = false;  
 unsigned long lastMillisInterrupt = 0;
 
 uint8_t LcdPot, HLcdPot;
@@ -88,7 +88,7 @@ boolean ModPar, MModPar, GetVal;
 
 int MaxT = 0;
 int MinT = 30;
-int AutoOffTime;
+int AutoOffTime;		//Time for auto shutdown in seconds
 
 char KI, KD, KP;
 double DActTemp, DPidOut , DTempGun;
@@ -178,9 +178,7 @@ void handleMCPInterrupt() {
 	uint8_t ActEnc=0;
 	uint8_t intPin=contr.getLastInterruptPin();
 	uint8_t valPin=contr.getLastInterruptPinValue();
-	//Serial.print("uint8_tPin: ");
-	//Serial.print(uint8_tPin);
-	//Switch che  decide come gestire uint8_terrupt in base al pin che lo ha generato se A0 o A1 uint8_terpreta encoder altrimenti uint8_terpretazione come pulsante
+	//Switch che  decide come gestire interrupt in base al pin che lo ha generato se A0 o A1 uint8_terpreta encoder altrimenti uint8_terpretazione come pulsante
 	switch(intPin) {
 		case EN_A:
 		case EN_B:
@@ -206,10 +204,6 @@ void handleMCPInterrupt() {
 					break;
 			}
 			OldEnc=ActEnc;
-			//				Serial.print("ticPot: ");
-			//				Serial.println(ticPot);
-			//				Serial.print("Pot: ");
-			//				Serial.println(Pot);
 			if (ticPot >= PotDivider) {
 				Pot++;
 				ticPot=0;
@@ -217,8 +211,6 @@ void handleMCPInterrupt() {
 				Pot--;
 				ticPot=0;
 			} 
-			//				Serial.print("Scaled ticPot: ");
-			//				Serial.println(ticPot);
 			controllerEvent=CONTR_SCROLL;
 			break;
 		case EN_C:
@@ -254,16 +246,16 @@ void handleMCPInterrupt() {
 }
 
 
-void MCPintCallBack() {
+void MCPintCallBack() {			//Low priority interrupt, the callback simply set a variable for interrupt handling fuctions in main loop.
 	awakenByMCPInterrupt = true;
 }
 
-void cleanMCPInterrupts() {
+void cleanMCPInterrupts() {			
 	//EIFR = 0x01;
 	awakenByMCPInterrupt = false;
 }
 
-void ZeroCCallBack() {
+void ZeroCCallBack() {			//High priority interrupt, only minimal operation and no time consumption routine
 	detachInterrupt(arduinoZeroCInterrupt);
 	sbi(PINB,5);           		//Defined by macro on top for fast toggle pin D13 = DEBUGLED
 	//we set callback for the arduino INT handler.
@@ -307,14 +299,14 @@ void modParMenu() {
 }
 void saveParMenu() {
 	switch (menu) {		//Third: save valid modified parameter on eeprom
-		case 31: 	TempGun = ModVal;	EEPROM.write(M_Temp, TempGun); 		EEPROM.write(M_Temp1, (TempGun >> 8));	break;
+		case 31: 	TempGun = ModVal;	EEPROM.write(M_Temp, TempGun); 		EEPROM.write(M_Temp1, (TempGun >> 8));	break;					//Save long value  to two eeprom memory bytes.
 		case 32: 	AirFlow = ModVal;	EEPROM.write(M_AirFlow, AirFlow); 	break;
 		case 61: 	KP 	= ModVal;	EEPROM.write(M_KP, KP);			break;
 		case 62: 	KI 	= ModVal;  	EEPROM.write(M_KI, KI);			break;
 		case 63: 	KD 	= ModVal;	EEPROM.write(M_KD, KD);			break;
 		case 64: 	MinT 	= ModVal;  	EEPROM.write(M_MinT, MinT);		break;
 		case 65: 	MaxT 	= ModVal;   	EEPROM.write(M_MaxT, MaxT);   				EEPROM.write(M_MaxT1, (MaxT >> 8));     		break;
-		case 111: 	AutoOffTime= ModVal;   	EEPROM.write(M_AutoOffTime, AutoOffTime);   		EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8));	break;
+		case 111: 	AutoOffTime= ModVal;   	EEPROM.write(M_AutoOffTime, AutoOffTime);   		EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8));	break;  //Save long value  to two eeprom memory bytes.
 	}  
 	initPar=false;
 }
@@ -358,7 +350,7 @@ void setup() {
 	contr.setMCPType(LTI_TYPE_MCP23017); 
 	// set up the LCD's number of rows and columns:
 	contr.begin(16, 2);
-	// Pruint8_t a message to the LCD.
+	// Print a message to the LCD.
 	contr.clear();
 	contr.setBacklight(HIGH);
 	contr.setCursor(0, 0);
