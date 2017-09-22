@@ -412,8 +412,9 @@ void setup() {
 
 void loop() {
 
-	if (awakenByMCPInterrupt) handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
-
+	if (awakenByMCPInterrupt) {
+	handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
+	} else {
 	OCR1B =map(AirFlow,0,100,0,1023);
 
 	if (menu!=menuold) {
@@ -487,8 +488,9 @@ void loop() {
 		contr.print("Auto Power OFF");
 		if (ActTemp<=40) {
 			AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
+			Serial.println("Fan stop");
 			exit(0);
 		}
 	}
-
+	}
 }
