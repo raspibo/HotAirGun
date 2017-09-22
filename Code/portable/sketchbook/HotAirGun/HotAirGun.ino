@@ -381,6 +381,9 @@ void setup() {
 	MaxT = (MaxT << 8) + EEPROM.read(M_MaxT);
 	AutoOffTime = EEPROM.read(M_AutoOffTime1);
 	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
+	AutoOffTime *= -1;	//Convert to negative
+	Serial.print("Autoofftime: ");
+	Serial.println(AutoOffTime);
 	if (TempGun > D_MaxT) TempGun = D_MaxT;
 	if (AirFlow < D_AirFlow) AirFlow = D_AirFlow;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -482,13 +485,16 @@ void loop() {
 		weldCurve();
 	}
 
-	if (opTime<D_AutoOffTime) {  //Shutdown if inactive, other settings are required.....
+	if (opTime < AutoOffTime ) {  //Shutdown if inactive, other settings are required.....
 		TempGun=0;
 		contr.setCursor(0, 1);
 		contr.print("Auto Power OFF");
+		Serial.println("Auto Power OFF");
 		if (ActTemp<=40) {
 			AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
+			OCR1B =0;
 			Serial.println("Fan stop");
+			delay(500);
 			exit(0);
 		}
 	}
