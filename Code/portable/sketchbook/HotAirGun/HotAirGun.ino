@@ -105,7 +105,7 @@ boolean state;
 #define MENU_TITLES 12 
 boolean initPar=false;
 
-int ActTemp=145;		//Actual gun air temp
+int ActTemp=45;		//Actual gun air temp
 int TempGun=251;	//Target temperature for PID, at work the air flow with this temp from gun
 int AirFlow=100;
 
@@ -115,6 +115,7 @@ int menuold=-1;
 int ModVal;
 
 int opTime=0;		//operation Timer normally equal to millis(), used for temperature welding curve time calculation, displayed in home menu
+uint8_t phaseCounter=0; //increment at every phase zero crossing at 100 (=1 sec)  increment opTime
 int nextEventTime=0;
 int actTime=0;
 uint8_t curveInd=0;     //operation index for tempCurve array
@@ -262,6 +263,11 @@ void cleanMCPInterrupts() {
 void ZeroCCallBack() {			//High priority interrupt, only minimal operation and no time consumption routine
 	detachInterrupt(arduinoZeroCInterrupt);
 	sbi(PINB,5);           		//Defined by macro on top for fast toggle pin D13 = DEBUGLED
+	phaseCounter++;
+	if (phaseCounter>=100) {
+		opTime--;
+		phaseCounter=0;
+	}
 	//we set callback for the arduino INT handler.
 	attachInterrupt(arduinoZeroCInterrupt, ZeroCCallBack, FALLING);
 }
@@ -407,9 +413,9 @@ void setup() {
 void loop() {
 
 	if (awakenByMCPInterrupt) handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
-	
+
 	OCR1B =map(AirFlow,0,100,0,1023);
-	
+
 	if (menu!=menuold) {
 		contr.clear();
 		menudec=menu/10;
@@ -426,8 +432,7 @@ void loop() {
 		contr.print(AirFlow);
 		contr.print("%");
 		contr.setCursor(0, 1);
-		if (weldCycle>0) { contr.print("t:"); contr.print(opTime); }
-		opTime--;
+		if (weldCycle>0) { contr.print("t:"); contr.print(opTime); } else {contr.print("o:"); contr.print(opTime);}
 		LcdUpd=millis();
 	} 
 
@@ -482,6 +487,7 @@ void loop() {
 		contr.print("Auto Power OFF");
 		if (ActTemp<=40) {
 			AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
+			exit(0);
 		}
 	}
 
