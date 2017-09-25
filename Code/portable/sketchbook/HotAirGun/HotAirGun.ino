@@ -410,7 +410,7 @@ void setup() {
 	pinMode(P_FAN_PWM, OUTPUT);
 	//Set TMR1 for PWM at 16 MHz
 	TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
-	TCCR1B = _BV(CS12);
+	TCCR1B = _BV(CS10);
 }
 
 void loop() {
