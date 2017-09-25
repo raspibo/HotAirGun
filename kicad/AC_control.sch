@@ -1,0 +1,301 @@
+EESchema Schematic File Version 3
+LIBS:HotAirGun-rescue
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:w_connectors
+LIBS:max6675
+LIBS:lcd16x2
+LIBS:switches
+LIBS:HotAirGun-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 3 4
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Wire Wire Line
+	5680 4080 5680 4190
+Wire Wire Line
+	5230 3530 5230 3640
+Wire Wire Line
+	5680 3530 5680 3780
+Wire Wire Line
+	5580 4690 5830 4690
+Wire Wire Line
+	5680 4590 5680 4490
+Wire Wire Line
+	5830 4590 5680 4590
+Wire Wire Line
+	4830 4440 5530 4440
+Wire Wire Line
+	5230 4240 5230 3940
+Wire Wire Line
+	4830 4240 5230 4240
+Wire Wire Line
+	3680 4240 3830 4240
+Wire Wire Line
+	4130 4240 4230 4240
+Wire Wire Line
+	4130 4440 4230 4440
+Wire Wire Line
+	6880 3740 7230 3740
+Wire Wire Line
+	7230 3640 6880 3640
+Wire Wire Line
+	7030 4090 6880 4090
+Wire Wire Line
+	7480 4090 7330 4090
+Wire Wire Line
+	6880 4190 7780 4190
+Wire Wire Line
+	7030 2650 6930 2650
+Wire Wire Line
+	7430 2650 7330 2650
+Wire Wire Line
+	7130 2850 6930 2850
+Wire Wire Line
+	5380 2250 5380 2750
+Wire Wire Line
+	4580 2250 5380 2250
+Wire Wire Line
+	4580 2750 4780 2750
+Wire Wire Line
+	5680 3050 5080 3050
+Wire Wire Line
+	5680 2850 5680 3050
+Wire Wire Line
+	6080 2650 6130 2650
+Wire Wire Line
+	5680 2650 5780 2650
+Wire Wire Line
+	5680 2450 5680 2650
+Wire Wire Line
+	5080 2450 5680 2450
+Connection ~ 5680 3530
+Wire Wire Line
+	5230 3530 5880 3530
+Wire Wire Line
+	6130 2850 5680 2850
+Text GLabel 5880 3530 2    60   Input ~ 0
+220F
+Text GLabel 5580 4690 0    60   Input ~ 0
+220N
+Text GLabel 3680 4240 0    60   Input ~ 0
+RB1
+Text GLabel 7230 3740 2    60   Input ~ 0
+220F
+Text GLabel 7230 3640 2    60   Input ~ 0
+220N
+Text GLabel 7780 4190 2    60   Input ~ 0
+220N
+Text GLabel 7480 4090 2    60   Input ~ 0
+220F
+Text GLabel 7430 2650 2    60   Input ~ 0
+FASE_0
+$Comp
+L R R20
+U 1 1 59BB469A
+P 7180 2650
+F 0 "R20" V 7260 2650 50  0000 C CNN
+F 1 "220R" V 7180 2650 50  0000 C CNN
+F 2 "" V 7110 2650 50  0000 C CNN
+F 3 "" H 7180 2650 50  0000 C CNN
+	1    7180 2650
+	0    1    1    0   
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 59BB46A1
+P 7130 2850
+F 0 "#PWR?" H 7130 2600 50  0001 C CNN
+F 1 "GND" H 7130 2700 50  0000 C CNN
+F 2 "" H 7130 2850 50  0000 C CNN
+F 3 "" H 7130 2850 50  0000 C CNN
+	1    7130 2850
+	0    -1   -1   0   
+$EndComp
+Text GLabel 4580 2250 0    60   Input ~ 0
+220N
+Text GLabel 4580 2750 0    60   Input ~ 0
+220F
+$Comp
+L Fuse F1
+U 1 1 59BB46A9
+P 7180 4090
+F 0 "F1" V 7100 4030 50  0000 C CNN
+F 1 "Fuse1" V 7240 4090 50  0000 C CNN
+F 2 "" H 7180 4090 50  0000 C CNN
+F 3 "" H 7180 4090 50  0000 C CNN
+	1    7180 4090
+	0    1    1    0   
+$EndComp
+$Comp
+L CONN_01X02 CN3
+U 1 1 59BB46B0
+P 6680 4140
+F 0 "CN3" H 6680 3990 50  0000 C CNN
+F 1 "Trasf" H 6680 4290 50  0000 C CNN
+F 2 "" H 6680 4140 50  0000 C CNN
+F 3 "" H 6680 4140 50  0000 C CNN
+	1    6680 4140
+	-1   0    0    1   
+$EndComp
+$Comp
+L MOC3032M U2
+U 1 1 59BB46B7
+P 4530 4340
+F 0 "U2" H 4330 4540 50  0000 L CNN
+F 1 "Opto TRIAC Dip6" H 4230 4140 50  0000 L CNN
+F 2 "" H 4330 4140 50  0000 L CIN
+F 3 "" H 4495 4340 50  0000 L CNN
+	1    4530 4340
+	1    0    0    -1  
+$EndComp
+$Comp
+L TLP627-2 U3
+U 1 1 59BB46BE
+P 6530 2750
+F 0 "U3" H 6520 3050 60  0000 L BNN
+F 1 "TLP672-2" H 2630 -4400 60  0001 C CNN
+F 2 "" H 2630 -4400 60  0001 C CNN
+F 3 "" H 2630 -4400 60  0001 C CNN
+	1    6530 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X02 CN2
+U 1 1 59BB46C5
+P 6680 3690
+F 0 "CN2" H 6680 3540 50  0000 C CNN
+F 1 "220Vin" H 6630 3840 50  0000 C CNN
+F 2 "" H 6680 3690 50  0000 C CNN
+F 3 "" H 6680 3690 50  0000 C CNN
+	1    6680 3690
+	-1   0    0    1   
+$EndComp
+$Comp
+L CONN_01X02 CN1
+U 1 1 59BB46CC
+P 6030 4640
+F 0 "CN1" H 6030 4640 60  0000 L BNN
+F 1 "~" H 2730 -4660 60  0001 C CNN
+F 2 "" H 2730 -4660 60  0001 C CNN
+F 3 "" H 2730 -4660 60  0001 C CNN
+	1    6030 4640
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R18
+U 1 1 59BB46D3
+P 5230 3790
+F 0 "R18" V 5310 3790 50  0000 C CNN
+F 1 "~" V 5230 3790 50  0000 C CNN
+F 2 "" V 5160 3790 50  0000 C CNN
+F 3 "" H 5230 3790 50  0000 C CNN
+	1    5230 3790
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R17
+U 1 1 59BB46DA
+P 3980 4240
+F 0 "R17" V 4060 4240 50  0000 C CNN
+F 1 "330R" V 3980 4240 50  0000 C CNN
+F 2 "" V 3910 4240 50  0000 C CNN
+F 3 "" H 3980 4240 50  0000 C CNN
+	1    3980 4240
+	0    1    1    0   
+$EndComp
+$Comp
+L Q_TRIAC_AAG TR1
+U 1 1 59BB46E1
+P 5680 4340
+F 0 "TR1" H 5730 4390 50  0000 L CNN
+F 1 "~" H 2655 -4660 50  0000 L CNN
+F 2 "" V 2605 -4585 50  0001 C CNN
+F 3 "" V 2530 -4610 50  0001 C CNN
+	1    5680 4340
+	1    0    0    -1  
+$EndComp
+$Comp
+L L_Core_Iron L1
+U 1 1 59BB46E8
+P 5680 3930
+F 0 "L1" V 5630 3930 50  0000 C CNN
+F 1 "~" V 5780 3930 50  0000 C CNN
+F 2 "" H 5680 3930 50  0000 C CNN
+F 3 "" H 5680 3930 50  0000 C CNN
+	1    5680 3930
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R19
+U 1 1 59BB46EF
+P 5930 2650
+F 0 "R19" V 6010 2650 50  0000 C CNN
+F 1 "56K" V 5930 2650 50  0000 C CNN
+F 2 "" V 5860 2650 50  0000 C CNN
+F 3 "" H 5930 2650 50  0000 C CNN
+	1    5930 2650
+	0    1    1    0   
+$EndComp
+$Comp
+L D_Bridge_+AA- PR1
+U 1 1 59BB46F6
+P 5080 2750
+F 0 "PR1" V 5430 3000 50  0000 C CNN
+F 1 "PontRaddr 2A" V 4850 2480 50  0000 C CNN
+F 2 "" H 5080 2750 50  0000 C CNN
+F 3 "" H 5080 2750 50  0000 C CNN
+	1    5080 2750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L GND #GND_06
+U 1 1 59BB46FD
+P 4130 4440
+F 0 "#GND_06" H 4130 4190 50  0001 C CNN
+F 1 "GND" H 4130 4290 50  0000 C CNN
+F 2 "" H 4130 4440 50  0000 C CNN
+F 3 "" H 4130 4440 50  0000 C CNN
+	1    4130 4440
+	0    1    1    0   
+$EndComp
+Text Notes 5530 3250 0    60   ~ 0
+Controllo Fase
+$EndSCHEMATC
