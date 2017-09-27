@@ -20,6 +20,16 @@
 #define		LCD_Update	100
 #define		PID_Update	100
 
+#define 	PidTime   	100      //Period 1 sec
+#define 	TStop     	25
+#define 	Kp           	1
+#define 	Ki           	2
+#define 	Kd           	6
+#define 	SumE_Min     	-1200
+#define 	SumE_Max     	1200
+#define 	PidOutMin    	0
+#define 	PidOutMax    	1200
+
 //EEPROM data storage
 #define		M_Temp		2
 #define		M_Temp1		3
@@ -95,17 +105,24 @@ int MinT = 30;
 int AutoOffTime;		//Time for auto shutdown in seconds
 
 char KI, KD, KP;
-double DActTemp, DPidOut , DTempGun;
-char LcdPar, HLcdPar;
-char Time1, Time2;
-boolean MPStart, MPStop, StartCiclo;
+//double DActTemp, DPidOut , DTempGun;
+//char LcdPar, HLcdPar;
+//char Time1, Time2;
+//boolean MPStart, MPStop, StartCiclo;
+
+//Pid Var
+bool DoPid=0;			//Set to true if it's time to recalculate PID
+signed int  SumE, Int_Res, Dev_Res, Err, Err1;
+signed long Pid_Res;
+unsigned int PulseTime;
+
 boolean state;
 
 #define MENU_HOME 0
 #define MENU_TITLES 12 
 boolean initPar=false;
 
-int ActTemp=45;		//Actual gun air temp
+int ActTemp=145;		//Actual gun air temp
 int TempGun=251;	//Target temperature for PID, at work the air flow with this temp from gun
 int AirFlow=100;
 
@@ -220,21 +237,21 @@ void handleMCPInterrupt() {
 			break;
 		case EN_C:
 			if (valPin) {
-				Serial.print("click ");
+				//Serial.print("click ");
 				controllerEvent=CONTR_CLICK;
 				clickcount++;
-				Serial.println(clickcount);
+				//Serial.println(clickcount);
 			}
 			break;
 		default:
-			if (millis() > LcdUpd+1000) {
-				Serial.print("Button: A");
-				Serial.println(intPin);
+			if (millis() > lastMillisInterrupt+10) {
+				//Serial.print("Button: A");
+				//Serial.println(intPin);
 				controllerEvent=CONTR_BTN;
-				if (intPin==4) { //Only for debug purpose simulate temp change
+				if (intPin==4 && ActTemp > 0) { //Only for debug purpose simulate temp change
 					ActTemp--;   //Only for debug purpose simulate temp change
 				}                    //Only for debug purpose simulate temp change
-				if (intPin==6) { //Only for debug purpose simulate temp change
+				if (intPin==6 && ActTemp < 500) { //Only for debug purpose simulate temp change
 					ActTemp++;   //Only for debug purpose simulate temp change
 				}                    //Only for debug purpose simulate temp change
 			}
@@ -267,6 +284,7 @@ void ZeroCCallBack() {			//High priority interrupt, only minimal operation and n
 	if (phaseCounter>=100) {
 		opTime--;
 		phaseCounter=0;
+		DoPid=1;
 	}
 	//we set callback for the arduino INT handler.
 	attachInterrupt(arduinoZeroCInterrupt, ZeroCCallBack, FALLING);
@@ -343,20 +361,55 @@ void weldCurve() {
 		opTime=tempCurve[curveInd];
 	}
 	if (ActTemp==TempGun && opTime<=0) {
-		Serial.println("Time reached");
+		//Serial.println("Time reached");
 		curveInd++;
 	}
 	if (curveInd>=sizeof(tempCurve)) {
 		curveInd=0;
 		weldCycle=0;
 		menu=0;
-		Serial.println("Weld curve end");
+		//Serial.println("Weld curve end");
 	}
 }
 
+
+ void PID (void)    //Controllo PID
+{
+        Int_Res = Dev_Res = 0;
+        Err1 = Err;
+        Err = (TempGun-ActTemp);
+        // Integrale
+        SumE = SumE + Err;                      // SumE is the summation of the error terms
+        if(SumE > SumE_Max)SumE = SumE_Max;
+        if(SumE < SumE_Min)SumE = SumE_Min;
+
+        //Int_Res = SumE / 10;                 // Ki*SumE/(Kp*Fs*X) where X is an unknown scaling factor
+        Int_Res = SumE * Ki;                   // combination of scaling factor and Kp
+        //Int_Res = Int_Res ;// / 16;
+
+        // Calculate the derivative term
+       // Dev_Res = Err - Err1;
+        /*if(Dev_Res > 120)Dev_Res = 120;
+        if(Dev_Res < -120)Dev_Res = -120;*/
+
+        Dev_Res =   Kd*(Err - Err1);               // Derivative Kd(en0-en3)/(Kp*X*3*Ts)
+       //Dev_Res = Dev_Res /2;
+
+        if(Dev_Res > 120)Dev_Res = 120;
+        if(Dev_Res < -120)Dev_Res = -120;
+
+
+        // C(n) = K(E(n) + (Ts/Ti)SumE + (Td/Ts)[E(n) - E(n-1)])
+        Pid_Res = Err + Int_Res + Dev_Res;        // Sum the terms
+        Pid_Res = Pid_Res * Kp>>1;                // multiply by Kp then scale
+        if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
+        if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
+        PulseTime=63340+Pid_Res;
+}
+
 void setup() {
-	Serial.begin(115200);
-	Serial.print("Startup");
+	Serial.begin(2000000);
+	//Serial.print("Startup");
 	contr.setMCPType(LTI_TYPE_MCP23017); 
 	// set up the LCD's number of rows and columns:
 	contr.begin(16, 2);
@@ -370,8 +423,8 @@ void setup() {
 	TempGun = EEPROM.read(M_Temp1);
 	TempGun = (TempGun << 8) + EEPROM.read(M_Temp);
 	AirFlow = EEPROM.read(M_AirFlow);
-	Serial.print("Setup AirFlow:");
-	Serial.println(AirFlow);
+	//Serial.print("Setup AirFlow:");
+	//Serial.println(AirFlow);
 	KP = EEPROM.read(M_KP);
 	KI = EEPROM.read(M_KI);
 	KD = EEPROM.read(M_KD);
@@ -382,8 +435,8 @@ void setup() {
 	AutoOffTime = EEPROM.read(M_AutoOffTime1);
 	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
 	AutoOffTime *= -1;	//Convert to negative
-	Serial.print("Autoofftime: ");
-	Serial.println(AutoOffTime);
+	//Serial.print("Autoofftime: ");
+	//Serial.println(AutoOffTime);
 	if (TempGun > D_MaxT) TempGun = D_MaxT;
 	if (AirFlow < D_AirFlow) AirFlow = D_AirFlow;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -414,10 +467,21 @@ void setup() {
 }
 
 void loop() {
-
+	
 	if (awakenByMCPInterrupt) {
 	handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 	} else {
+	
+	if (DoPid) {
+		PID();
+		DoPid=0;
+		Serial.print(ActTemp);
+		Serial.print("\t");
+		Serial.print(TempGun);
+		Serial.print("\t");
+		Serial.println(Pid_Res);
+		}
+	
 	OCR1B =map(AirFlow,0,100,0,1023);
 
 	if (menu!=menuold) {
