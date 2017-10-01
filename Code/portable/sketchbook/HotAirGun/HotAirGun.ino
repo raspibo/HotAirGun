@@ -467,12 +467,7 @@ void setup() {
 }
 
 void loop() {
-	
-	if (awakenByMCPInterrupt) {
-	handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
-	} else {
-	
-	if (DoPid) {
+		if (DoPid) {
 		PID();
 		DoPid=0;
 		Serial.print(ActTemp);
@@ -480,7 +475,12 @@ void loop() {
 		Serial.print(TempGun);
 		Serial.print("\t");
 		Serial.println(Pid_Res);
-		}
+		} else {
+
+	if (awakenByMCPInterrupt) {
+	handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
+	} else {
+	
 	
 	OCR1B =map(AirFlow,0,100,0,1023);
 
@@ -563,4 +563,5 @@ void loop() {
 		}
 	}
 	}
+}
 }
