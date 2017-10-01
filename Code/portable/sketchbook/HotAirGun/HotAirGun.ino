@@ -373,38 +373,38 @@ void weldCurve() {
 }
 
 
- void PID (void)    //Controllo PID
+void PID (void)    //Controllo PID
 {
-        Int_Res = Dev_Res = 0;
-        Err1 = Err;
-        Err = (TempGun-ActTemp);
-        // Integrale
-        SumE = SumE + Err;                      // SumE is the summation of the error terms
-        if(SumE > SumE_Max)SumE = SumE_Max;
-        if(SumE < SumE_Min)SumE = SumE_Min;
+	Int_Res = Dev_Res = 0;
+	Err1 = Err;
+	Err = (TempGun-ActTemp);
+	// Integrale
+	SumE = SumE + Err;                      // SumE is the summation of the error terms
+	if(SumE > SumE_Max)SumE = SumE_Max;
+	if(SumE < SumE_Min)SumE = SumE_Min;
 
-        //Int_Res = SumE / 10;                 // Ki*SumE/(Kp*Fs*X) where X is an unknown scaling factor
-        Int_Res = SumE * Ki;                   // combination of scaling factor and Kp
-        //Int_Res = Int_Res ;// / 16;
+	//Int_Res = SumE / 10;                 // Ki*SumE/(Kp*Fs*X) where X is an unknown scaling factor
+	Int_Res = SumE * Ki;                   // combination of scaling factor and Kp
+	//Int_Res = Int_Res ;// / 16;
 
-        // Calculate the derivative term
-       // Dev_Res = Err - Err1;
-        /*if(Dev_Res > 120)Dev_Res = 120;
-        if(Dev_Res < -120)Dev_Res = -120;*/
+	// Calculate the derivative term
+	// Dev_Res = Err - Err1;
+	/*if(Dev_Res > 120)Dev_Res = 120;
+	  if(Dev_Res < -120)Dev_Res = -120;*/
 
-        Dev_Res =   Kd*(Err - Err1);               // Derivative Kd(en0-en3)/(Kp*X*3*Ts)
-       //Dev_Res = Dev_Res /2;
+	Dev_Res =   Kd*(Err - Err1);               // Derivative Kd(en0-en3)/(Kp*X*3*Ts)
+	//Dev_Res = Dev_Res /2;
 
-        if(Dev_Res > 120)Dev_Res = 120;
-        if(Dev_Res < -120)Dev_Res = -120;
+	if(Dev_Res > 120)Dev_Res = 120;
+	if(Dev_Res < -120)Dev_Res = -120;
 
 
-        // C(n) = K(E(n) + (Ts/Ti)SumE + (Td/Ts)[E(n) - E(n-1)])
-        Pid_Res = Err + Int_Res + Dev_Res;        // Sum the terms
-        Pid_Res = Pid_Res * Kp>>1;                // multiply by Kp then scale
-        if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
-        if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
-        PulseTime=63340+Pid_Res;
+	// C(n) = K(E(n) + (Ts/Ti)SumE + (Td/Ts)[E(n) - E(n-1)])
+	Pid_Res = Err + Int_Res + Dev_Res;        // Sum the terms
+	Pid_Res = Pid_Res * Kp>>1;                // multiply by Kp then scale
+	if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
+	if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
+	PulseTime=63340+Pid_Res;
 }
 
 void setup() {
@@ -467,7 +467,7 @@ void setup() {
 }
 
 void loop() {
-		if (DoPid) {
+	if (DoPid) {
 		PID();
 		DoPid=0;
 		Serial.print(ActTemp);
@@ -475,93 +475,93 @@ void loop() {
 		Serial.print(TempGun);
 		Serial.print("\t");
 		Serial.println(Pid_Res);
-		} else {
-
-	if (awakenByMCPInterrupt) {
-	handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 	} else {
-	
-	
-	OCR1B =map(AirFlow,0,100,0,1023);
 
-	if (menu!=menuold) {
-		contr.clear();
-		menudec=menu/10;
-		menuunit=menu%10;
-		contr.print(&menuvoice[menudec][menuunit][1]);  //Start printing lcd from second char to hide first menu control char
-		menuold=menu;
-	} else if (menu==0 && millis() > LcdUpd+1000) {         //Home menu special handler for live update var every second
-		contr.clear();
-		contr.print("T: ");
-		contr.print(ActTemp);
-		contr.print("/");
-		contr.print(TempGun);
-		contr.print(" A:");
-		contr.print(AirFlow);
-		contr.print("%");
-		contr.setCursor(0, 1);
-		if (weldCycle>0) { contr.print("t:"); contr.print(opTime); } else {contr.print("o:"); contr.print(opTime);}
-		LcdUpd=millis();
-	} 
-
-	if (menuunit==0 && menuvoice[menudec][menuunit]=="x" ){ //Menu title on click, next menu title Home -> Set Par -> Functions, if X skip to next level
-		if (menudec < MENU_TITLES-2) {                  //Skip next level if not maximum level 
-			menu=menu+10;
+		if (awakenByMCPInterrupt) {
+			handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 		} else {
-			menu=MENU_HOME;					//if maximum level return to home
-		}
-	} 
-	if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='h'){ //On menuvoice=Exit goto menu title
-		PotDivider=POTDIVIDER;	        //Restore value encoder tick divider for sensibilty regulation (modified in m voice handler)
-		saveParMenu();			//For specific voices save parameters on eeprom				
-		menu=MENU_HOME;
-		controllerEvent=CONTR_NOEVENT;
-	} 
-	if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='a'){ //For first letter menu voice=a (apply predefined value) and go to home
-		setMac();
-		menu=MENU_HOME;
-		controllerEvent=CONTR_NOEVENT;
-	} 
-	if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='m'){ //For first letter menu voice=m (modify value) specific handler
-		contr.setCursor(0, 1);
-		contr.print("Scroll for mod");
-	} 
-	if (controllerEvent==CONTR_SCROLL && menuvoice[menudec][menuunit][0]=='m'){ //For first letter menu voice=m (modify value) specific handler
-		PotDivider=1;                   //Set encoder divider for maximun sensibility, this speed value change (ie temp regulation)
-		modParMenu();
-		controllerEvent=CONTR_NOEVENT;
-	} else if (controllerEvent==CONTR_CLICK && menudec <= MENU_TITLES-1 ){
-		menu=menu+10;
-		controllerEvent=CONTR_NOEVENT;
-	} 
 
 
-	if (controllerEvent==CONTR_SCROLL && menu > 0 ){
-		if (menuvoice[menudec][menuunit][0]!='h' && Pot==+1) {   //scorre solo fino all'ultima voce del menu
-			menu=Pot+menu;
-		} else if (menuunit>0 && Pot==-1) {  //torna indietro ruotando la rotella solo però fino alla  prima voce
-			menu=Pot+menu;
-		}
-		Pot=0;
-		controllerEvent=CONTR_NOEVENT;
-	};
-	if (weldCycle>0) {  //Check if weld temperature cycle is active and then invoke it
-		weldCurve();
-	}
+			OCR1B =map(AirFlow,0,100,0,1023);
 
-	if (opTime < AutoOffTime ) {  //Shutdown if inactive, other settings are required.....
-		TempGun=0;
-		contr.setCursor(0, 1);
-		contr.print("Auto Power OFF");
-		Serial.println("Auto Power OFF");
-		if (ActTemp<=40) {
-			AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
-			OCR1B =0;
-			Serial.println("Fan stop");
-			delay(500);
-			exit(0);
+			if (menu!=menuold) {
+				contr.clear();
+				menudec=menu/10;
+				menuunit=menu%10;
+				contr.print(&menuvoice[menudec][menuunit][1]);  //Start printing lcd from second char to hide first menu control char
+				menuold=menu;
+			} else if (menu==0 && millis() > LcdUpd+1000) {         //Home menu special handler for live update var every second
+				contr.clear();
+				contr.print("T: ");
+				contr.print(ActTemp);
+				contr.print("/");
+				contr.print(TempGun);
+				contr.print(" A:");
+				contr.print(AirFlow);
+				contr.print("%");
+				contr.setCursor(0, 1);
+				if (weldCycle>0) { contr.print("t:"); contr.print(opTime); } else {contr.print("o:"); contr.print(opTime);}
+				LcdUpd=millis();
+			} 
+
+			if (menuunit==0 && menuvoice[menudec][menuunit]=="x" ){ //Menu title on click, next menu title Home -> Set Par -> Functions, if X skip to next level
+				if (menudec < MENU_TITLES-2) {                  //Skip next level if not maximum level 
+					menu=menu+10;
+				} else {
+					menu=MENU_HOME;					//if maximum level return to home
+				}
+			} 
+			if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='h'){ //On menuvoice=Exit goto menu title
+				PotDivider=POTDIVIDER;	        //Restore value encoder tick divider for sensibilty regulation (modified in m voice handler)
+				saveParMenu();			//For specific voices save parameters on eeprom				
+				menu=MENU_HOME;
+				controllerEvent=CONTR_NOEVENT;
+			} 
+			if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='a'){ //For first letter menu voice=a (apply predefined value) and go to home
+				setMac();
+				menu=MENU_HOME;
+				controllerEvent=CONTR_NOEVENT;
+			} 
+			if (controllerEvent==CONTR_CLICK && menuvoice[menudec][menuunit][0]=='m'){ //For first letter menu voice=m (modify value) specific handler
+				contr.setCursor(0, 1);
+				contr.print("Scroll for mod");
+			} 
+			if (controllerEvent==CONTR_SCROLL && menuvoice[menudec][menuunit][0]=='m'){ //For first letter menu voice=m (modify value) specific handler
+				PotDivider=1;                   //Set encoder divider for maximun sensibility, this speed value change (ie temp regulation)
+				modParMenu();
+				controllerEvent=CONTR_NOEVENT;
+			} else if (controllerEvent==CONTR_CLICK && menudec <= MENU_TITLES-1 ){
+				menu=menu+10;
+				controllerEvent=CONTR_NOEVENT;
+			} 
+
+
+			if (controllerEvent==CONTR_SCROLL && menu > 0 ){
+				if (menuvoice[menudec][menuunit][0]!='h' && Pot==+1) {   //scorre solo fino all'ultima voce del menu
+					menu=Pot+menu;
+				} else if (menuunit>0 && Pot==-1) {  //torna indietro ruotando la rotella solo però fino alla  prima voce
+					menu=Pot+menu;
+				}
+				Pot=0;
+				controllerEvent=CONTR_NOEVENT;
+			};
+			if (weldCycle>0) {  //Check if weld temperature cycle is active and then invoke it
+				weldCurve();
+			}
+
+			if (opTime < AutoOffTime ) {  //Shutdown if inactive, other settings are required.....
+				TempGun=0;
+				contr.setCursor(0, 1);
+				contr.print("Auto Power OFF");
+				Serial.println("Auto Power OFF");
+				if (ActTemp<=40) {
+					AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
+					OCR1B =0;
+					Serial.println("Fan stop");
+					delay(500);
+					exit(0);
+				}
+			}
 		}
 	}
-	}
-}
 }
