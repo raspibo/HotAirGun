@@ -553,7 +553,8 @@ void loop() {
 				TempGun=0;
 				contr.setCursor(0, 1);
 				contr.print("Auto Power OFF");
-				Serial.println("Auto Power OFF");
+				AirFlow=100;
+				//Serial.println("Auto Power OFF");
 				if (ActTemp<=40) {
 					AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
 					OCR1B =0;
