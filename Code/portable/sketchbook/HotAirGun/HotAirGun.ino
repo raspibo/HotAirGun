@@ -61,7 +61,7 @@
 #define CONTR_BTN    3 // Button pressed
 
 
-#define P_FAN_PWM 10   //Define pin D10 for pwm signal for gun
+#define P_FAN_PWM    11   //Define pin D10 for pwm signal for gun
 
 
 #define DEBUGLED     13 //Led used for debug purpose
@@ -470,6 +470,9 @@ void setup() {
 	// TCCR1B – Timer/Counter1 Control Register B
 	//CS12:0: Clock Select -> CS10 Clock quartz with No prescaling
 	TCCR1B = _BV(CS10);
+	//TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+	TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM20);
+	TCCR2B = _BV(CS22);
 }
 
 void loop() {
@@ -487,8 +490,7 @@ void loop() {
 			handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 		} else {
 
-
-			OCR1B =map(AirFlow,0,100,0,1023);
+			OCR2A =map(AirFlow,0,100,0,255);
 
 			if (menu!=menuold) {
 				contr.clear();
@@ -563,7 +565,7 @@ void loop() {
 				//Serial.println("Auto Power OFF");
 				if (ActTemp<=40) {
 					AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
-					OCR1B =0;
+					OCR2A =0;
 					Serial.println("Fan stop");
 					delay(500);
 					exit(0);
