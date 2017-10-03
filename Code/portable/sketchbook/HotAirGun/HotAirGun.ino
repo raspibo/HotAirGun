@@ -409,7 +409,13 @@ void setup() {
 	pinMode(DEBUGPIN, OUTPUT);
 	pinMode(P_FAN_PWM, OUTPUT);
 	//Set TMR1 for PWM at 16 MHz
+	//TCCR1A – Timer/Counter1 Control Register A
+	//COM1A1:0: Compare Output Mode for Channel A
+	//COM1B1:0: Compare Output Mode for Channel B
+	//WGM11:0:  Waveform Generation Mode
 	TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
+	// TCCR1B – Timer/Counter1 Control Register B
+	//CS12:0: Clock Select -> CS10 Clock quartz with No prescaling
 	TCCR1B = _BV(CS10);
 }
 
