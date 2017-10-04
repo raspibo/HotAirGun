@@ -465,13 +465,20 @@ void setup() {
 	//TCCR1A – Timer/Counter1 Control Register A
 	//COM1A1:0: Compare Output Mode for Channel A
 	//COM1B1:0: Compare Output Mode for Channel B
-	//WGM11:0:  Waveform Generation Mode
+	//WGM11:0:  Waveform Generation Mode for  timer1
 	TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
-	// TCCR1B – Timer/Counter1 Control Register B
+	//TCCR1B – Timer/Counter1 Control Register B
 	//CS12:0: Clock Select -> CS10 Clock quartz with No prescaling
 	TCCR1B = _BV(CS10);
-	//TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+	
+	//Set TMR2 for PWM at 16 MHz
+	//TCCR1A – Timer/Counter1 Control Register A
+	//COM2A1: COM2An: Compare Output Mode for Channel A on non-PWM mode (depend of  WGM2[2:0] bit). Clear OC2A on Compare Match in  
+	//COM2B1: Compare Output Mode for Channel B. Clear OC2B on Compare Match.
+	//WGM20: Waveform Generation Mode for timer2
 	TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM20);
+	//TCCR2B – Timer/Counter2 Control Register B
+	//CS22:0: Clock Select -> CS22 Clock quartz/64 by prescaler. Required by 8 bit counter.
 	TCCR2B = _BV(CS22);
 }
 
