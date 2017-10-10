@@ -66,6 +66,11 @@
 
 #define DEBUGLED     13 //Led used for debug purpose
 #define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
+
+
+#define GATE 9    //TRIAC gate
+#define PULSE 0x0F   //trigger pulse width (counts)
+
 #define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
 int lstate = 0;
 
@@ -116,13 +121,14 @@ signed int  SumE, Int_Res, Dev_Res, Err, Err1;
 signed long Pid_Res;
 unsigned int PulseTime;
 
+uint16_t TCNT_timer=0;
 boolean state;
 
 #define MENU_HOME 0
 #define MENU_TITLES 12 
 boolean initPar=false;
 
-int ActTemp=145;		//Actual gun air temp
+int ActTemp=185;		//Actual gun air temp
 int TempGun=251;	//Target temperature for PID, at work the air flow with this temp from gun
 int AirFlow=100;
 
@@ -286,9 +292,35 @@ void ZeroCCallBack() {			//High priority interrupt, only minimal operation and n
 		phaseCounter=0;
 		DoPid=1;
 	}
+/*	TCNT_timer=63450; // 2ms
+	TCNT_timer=64000; // 4ms 
+	TCNT_timer=65000; // 8ms 
+	TCNT_timer=63000; //NC
+	TCNT_timer=63200; // 645us
+	TCNT_timer=63100; // 250us
+	TCNT_timer=63080; // 150us
+	TCNT_timer=63060; // 79us
+*/
+	TCNT_timer=63060+Pid_Res;
+	
+        TCNT1H = TCNT_timer >> 8;  
+        TCNT1L = TCNT_timer & 0x00FF;
+        TIMSK1 |= (1<<TOIE1);
 	//we set callback for the arduino INT handler.
-	attachInterrupt(arduinoZeroCInterrupt, ZeroCCallBack, FALLING);
+	attachInterrupt(arduinoZeroCInterrupt, ZeroCCallBack, RISING);
 }
+
+ISR(TIMER1_OVF_vect){ //timer1 overflow
+  if (digitalRead(GATE)==0) {
+  TCNT1H = 0xFF;  
+  TCNT1L = 0xFF - PULSE;
+  digitalWrite(GATE,HIGH); //turn on TRIAC gate
+} else {
+  digitalWrite(GATE,LOW); //turn off TRIAC gate
+  TIMSK1 &= ~(1<<TOIE1);
+}
+}
+
 
 
 void modParMenu() {
@@ -461,17 +493,24 @@ void setup() {
 	pinMode(DEBUGLED, OUTPUT);
 	pinMode(DEBUGPIN, OUTPUT);
 	pinMode(P_FAN_PWM, OUTPUT);
-	//Set TMR1 for PWM at 16 MHz
+	pinMode(GATE, OUTPUT);
+	//Set TMR1 related registers, used for Triac driving
+	//Useful info at http://forum.arduino.cc/index.php?topic=94100.0
+	//TIMSK1 Timer Interrupt Mask Register
+	//TOIE Overflow Interrupt disable during setup 
+  	TIMSK1 &= _BV(TOIE1);  
 	//TCCR1A – Timer/Counter1 Control Register A
-	//COM1A1:0: Compare Output Mode for Channel A
-	//COM1B1:0: Compare Output Mode for Channel B
 	//WGM11:0:  Waveform Generation Mode for  timer1
-	TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
+	//WGM10 = WGM11 = WGM12 = WGM13 = 0 ===>> "Normal mode, only count, no PWM, no fast PWM ecc"  
+	TCCR1A &= ~(_BV(WGM11) | _BV(WGM10)); 
 	//TCCR1B – Timer/Counter1 Control Register B
-	//CS12:0: Clock Select -> CS10 Clock quartz with No prescaling
-	TCCR1B = _BV(CS10);
+	TCCR1B &= ~(_BV(WGM12) | _BV(WGM13));  
+	//OCIE1A Overflow Interrupt register
+	TIMSK1 &= _BV(OCIE1A);  
+	//CS11 Clock Select -> CS11 Clock quartz with prescaling 8
+	TCCR1B |= (1<<CS11); 
 	
-	//Set TMR2 for PWM at 16 MHz
+	//Set TMR2 for PWM at 16 MHz, used for fan PWM control
 	//TCCR1A – Timer/Counter1 Control Register A
 	//COM2A1: COM2An: Compare Output Mode for Channel A on non-PWM mode (depend of  WGM2[2:0] bit). Clear OC2A on Compare Match in  
 	//COM2B1: Compare Output Mode for Channel B. Clear OC2B on Compare Match.
@@ -483,8 +522,8 @@ void setup() {
 }
 
 void loop() {
-	if (DoPid) {
-		PID();
+	if (DoPid) {					//Check if PID recalc is needed(recalc after 1 second) 
+		PID();					
 		DoPid=0;
 		Serial.print(ActTemp);
 		Serial.print("\t");
@@ -497,7 +536,7 @@ void loop() {
 			handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 		} else {
 
-			OCR2A =map(AirFlow,0,100,0,255);
+			OCR2A =map(AirFlow,0,100,0,255);  //Adapt percent value to 0-255 scale for timer and apply to OCR2A register for pwm generation.
 
 			if (menu!=menuold) {
 				contr.clear();
