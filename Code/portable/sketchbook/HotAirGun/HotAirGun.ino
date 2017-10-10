@@ -119,7 +119,6 @@ char KI, KD, KP;
 bool DoPid=0;			//Set to true if it's time to recalculate PID
 signed int  SumE, Int_Res, Dev_Res, Err, Err1;
 signed long Pid_Res;
-unsigned int PulseTime;
 
 uint16_t TCNT_timer=0;
 boolean state;
@@ -301,7 +300,7 @@ void ZeroCCallBack() {			//High priority interrupt, only minimal operation and n
 	TCNT_timer=63080; // 150us
 	TCNT_timer=63060; // 79us
 */
-	TCNT_timer=63060+Pid_Res;
+	//TCNT_timer=63060+Pid_Res;  
 	
         TCNT1H = TCNT_timer >> 8;  
         TCNT1L = TCNT_timer & 0x00FF;
@@ -436,7 +435,7 @@ void PID (void)    //Controllo PID
 	Pid_Res = Pid_Res * Kp>>1;                // multiply by Kp then scale
 	if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
 	if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
-	PulseTime=63340+Pid_Res;
+	TCNT_timer=63060+Pid_Res;
 }
 
 void setup() {
