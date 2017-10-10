@@ -66,9 +66,10 @@
 
 #define DEBUGLED     13 //Led used for debug purpose
 #define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
-
-
-#define GATE 9    //TRIAC gate
+#define GATE	9    //TRIAC gate
+#define SO	5    //MAX6675 signal serial out
+#define CS 	6    //MAX6675 signal Chip select
+#define SCK	7    //MAX6675 signal clock
 #define PULSE 0x0F   //trigger pulse width (counts)
 
 #define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
@@ -406,6 +407,7 @@ void weldCurve() {
 
 void PID (void)    //Controllo PID
 {
+	ActTemp=TempC();
 	Int_Res = Dev_Res = 0;
 	Err1 = Err;
 	Err = (TempGun-ActTemp);
@@ -436,6 +438,46 @@ void PID (void)    //Controllo PID
 	if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
 	if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
 	TCNT_timer=63060+Pid_Res;
+}
+
+
+
+
+
+char TC_Read() {
+  char d;
+  signed char i;
+  d = 0;
+
+   for (i=7; i>=0; i--)
+  {
+    digitalWrite(SCK,HIGH);
+    delay(1);
+    if (digitalRead(SO)) {
+      d |= (1 << i);
+    }
+    digitalWrite(SCK,LOW);
+    delay(1);
+  }
+  return d;
+}
+
+signed int TempC(){
+  signed int Read;
+  digitalWrite(CS,LOW);
+  delay(1);
+  Read=0;
+  Read = TC_Read();
+  Read <<= 8;
+  Read |= TC_Read();
+  digitalWrite(CS,HIGH);
+  if ((Read & 0x4)>>2) {  // Probe disconnected
+  return (-1);
+  }
+  Read >>= 3;
+  Serial.println(Read,DEC);
+  return (Read*0.25);
+
 }
 
 void setup() {
@@ -493,6 +535,10 @@ void setup() {
 	pinMode(DEBUGPIN, OUTPUT);
 	pinMode(P_FAN_PWM, OUTPUT);
 	pinMode(GATE, OUTPUT);
+	pinMode(SO, INPUT_PULLUP);  
+	pinMode(CS, OUTPUT);
+	pinMode(SCK, OUTPUT);
+
 	//Set TMR1 related registers, used for Triac driving
 	//Useful info at http://forum.arduino.cc/index.php?topic=94100.0
 	//TIMSK1 Timer Interrupt Mask Register
