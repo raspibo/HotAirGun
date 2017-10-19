@@ -67,7 +67,7 @@
 #define DEBUGLED     13 //Led used for debug purpose
 #define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
 #define GATE	9    //TRIAC gate
-#define SO	5    //MAX6675 signal serial out
+#define SO	5    //MAX6675 signal serial out aka MISO on SPI
 #define CS 	6    //MAX6675 signal Chip select
 #define SCK	7    //MAX6675 signal clock
 #define PULSE 0x0F   //trigger pulse width (counts)
@@ -407,7 +407,7 @@ void weldCurve() {
 
 void PID (void)    //Controllo PID
 {
-	ActTemp=TempC();
+	if (opTime & 1) ActTemp=TempC();
 	Int_Res = Dev_Res = 0;
 	Err1 = Err;
 	Err = (TempGun-ActTemp);
@@ -441,42 +441,55 @@ void PID (void)    //Controllo PID
 }
 
 
+byte TC_Read(void) { 
+  int i;
+  byte d = 0;
 
-
-
-char TC_Read() {
-  char d;
-  signed char i;
-  d = 0;
-
-   for (i=7; i>=0; i--)
+  for (i=7; i>=0; i--)
   {
-    digitalWrite(SCK,HIGH);
-    delay(1);
+    digitalWrite(SCK, LOW);
+    _delay_ms(1);
     if (digitalRead(SO)) {
+      //set the bit to 0 no matter what
       d |= (1 << i);
     }
-    digitalWrite(SCK,LOW);
-    delay(1);
+
+    digitalWrite(SCK, HIGH);
+    _delay_ms(1);
   }
+
   return d;
 }
 
+
 signed int TempC(){
-  signed int Read;
-  digitalWrite(CS,LOW);
-  delay(1);
-  Read=0;
-  Read = TC_Read();
-  Read <<= 8;
-  Read |= TC_Read();
-  digitalWrite(CS,HIGH);
-  if ((Read & 0x4)>>2) {  // Probe disconnected
-  return (-1);
+  uint16_t v;
+
+  digitalWrite(CS, LOW);
+  _delay_ms(1);
+
+  v = TC_Read();
+  v <<= 8;
+  v |= TC_Read();
+
+  digitalWrite(CS, HIGH);
+
+  if (v & 0x2) {
+    //no MAX6675
+    return -200; 
+    //return -100;
   }
-  Read >>= 3;
-  Serial.println(Read,DEC);
-  return (Read*0.25);
+
+  if (v & 0x4) {
+    //no thermocouple attached
+    return -100; 
+    //return -100;
+  }
+
+  v >>= 3;
+
+  return v*0.25;
+
 
 }
 
@@ -535,9 +548,12 @@ void setup() {
 	pinMode(DEBUGPIN, OUTPUT);
 	pinMode(P_FAN_PWM, OUTPUT);
 	pinMode(GATE, OUTPUT);
-	pinMode(SO, INPUT_PULLUP);  
+
+	//define pin modes MAX6675
 	pinMode(CS, OUTPUT);
-	pinMode(SCK, OUTPUT);
+	pinMode(SCK, OUTPUT); 
+	pinMode(SO, INPUT);
+	digitalWrite(CS, HIGH);
 
 	//Set TMR1 related registers, used for Triac driving
 	//Useful info at http://forum.arduino.cc/index.php?topic=94100.0
