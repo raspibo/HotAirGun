@@ -2,12 +2,8 @@ EESchema Schematic File Version 3
 LIBS:HotAirGun-rescue
 LIBS:power
 LIBS:device
-LIBS:transistors
-LIBS:conn
 LIBS:linear
 LIBS:regul
-LIBS:74xx
-LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
@@ -22,17 +18,14 @@ LIBS:audio
 LIBS:interface
 LIBS:digital-audio
 LIBS:philips
-LIBS:display
 LIBS:cypress
 LIBS:siliconi
 LIBS:opto
 LIBS:atmel
 LIBS:contrib
-LIBS:valves
 LIBS:w_connectors
 LIBS:max6675
 LIBS:lcd16x2
-LIBS:switches
 LIBS:HotAirGun-cache
 EELAYER 26 0
 EELAYER END
@@ -116,7 +109,7 @@ Text GLabel 5880 3530 2    60   Input ~ 0
 Text GLabel 5580 4690 0    60   Input ~ 0
 220N
 Text GLabel 3680 4240 0    60   Input ~ 0
-RB1
+TRIAC
 Text GLabel 7230 3740 2    60   Input ~ 0
 220F
 Text GLabel 7230 3640 2    60   Input ~ 0
