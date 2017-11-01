@@ -1,9 +1,13 @@
-EESchema Schematic File Version 3
+EESchema Schematic File Version 2
 LIBS:HotAirGun-rescue
 LIBS:power
 LIBS:device
+LIBS:transistors
+LIBS:conn
 LIBS:linear
 LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
@@ -18,16 +22,18 @@ LIBS:audio
 LIBS:interface
 LIBS:digital-audio
 LIBS:philips
+LIBS:display
 LIBS:cypress
 LIBS:siliconi
 LIBS:opto
 LIBS:atmel
 LIBS:contrib
-LIBS:w_connectors
+LIBS:valves
 LIBS:max6675
 LIBS:lcd16x2
+LIBS:switches
 LIBS:HotAirGun-cache
-EELAYER 26 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -1087,4 +1093,6 @@ Wire Wire Line
 	3450 5840 3450 5790
 Wire Wire Line
 	3950 5840 3950 5790
+Text GLabel 8100 2080 2    60   Input ~ 0
+Reset
 $EndSCHEMATC

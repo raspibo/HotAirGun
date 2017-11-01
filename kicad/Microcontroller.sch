@@ -1,9 +1,13 @@
-EESchema Schematic File Version 3
+EESchema Schematic File Version 2
 LIBS:HotAirGun-rescue
 LIBS:power
 LIBS:device
+LIBS:transistors
+LIBS:conn
 LIBS:linear
 LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
@@ -18,16 +22,18 @@ LIBS:audio
 LIBS:interface
 LIBS:digital-audio
 LIBS:philips
+LIBS:display
 LIBS:cypress
 LIBS:siliconi
 LIBS:opto
 LIBS:atmel
 LIBS:contrib
-LIBS:w_connectors
+LIBS:valves
 LIBS:max6675
 LIBS:lcd16x2
+LIBS:switches
 LIBS:HotAirGun-cache
-EELAYER 26 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -62,40 +68,40 @@ Text Notes 3260 4470 0    60   ~ 0
 $Comp
 L Arduino_Nano_Header J8
 U 1 1 59BC3AFF
-P 5580 4170
-F 0 "J8" H 5580 5107 60  0000 C CNN
-F 1 "Arduino_Nano_Header" H 5580 5001 60  0000 C CNN
-F 2 "" H 5580 4170 60  0000 C CNN
-F 3 "" H 5580 4170 60  0000 C CNN
-	1    5580 4170
+P 5670 4230
+F 0 "J8" H 5670 5167 60  0000 C CNN
+F 1 "Arduino_Nano_Header" H 5670 5061 60  0000 C CNN
+F 2 "" H 5670 4230 60  0000 C CNN
+F 3 "" H 5670 4230 60  0000 C CNN
+	1    5670 4230
 	1    0    0    -1  
 $EndComp
-Text GLabel 4535 4270 0    60   Input ~ 0
+Text GLabel 4625 4330 0    60   Input ~ 0
 CS
-Text GLabel 4580 4370 0    60   Input ~ 0
+Text GLabel 4670 4430 0    60   Input ~ 0
 SCK
-Text GLabel 4530 4170 0    60   Input ~ 0
+Text GLabel 4620 4230 0    60   Input ~ 0
 SO
-Text GLabel 6530 4170 2    60   Input ~ 0
+Text GLabel 6620 4230 2    60   Input ~ 0
 SDA
-Text GLabel 6535 4070 2    60   Input ~ 0
+Text GLabel 6625 4130 2    60   Input ~ 0
 SCL
-Text GLabel 4730 3870 0    60   Input ~ 0
+Text GLabel 4820 3930 0    60   Input ~ 0
 FASE_0
-Text GLabel 4580 4770 0    60   Input ~ 0
+Text GLabel 4670 4830 0    60   Input ~ 0
 FAN
-Text GLabel 5090 4470 0    60   Input ~ 0
+Text GLabel 5180 4530 0    60   Input ~ 0
 RELE_SIC_220V
-Text GLabel 4655 4570 0    60   Input ~ 0
+Text GLabel 4745 4630 0    60   Input ~ 0
 TRIAC
 Wire Wire Line
-	6530 4170 5930 4170
+	6620 4230 6020 4230
 Wire Wire Line
-	4730 3870 5230 3870
+	4820 3930 5320 3930
 Wire Wire Line
-	4655 4570 5230 4570
+	4745 4630 5320 4630
 Wire Wire Line
-	5090 4470 5230 4470
+	5180 4530 5320 4530
 $Comp
 L GND #GND_07
 U 1 1 59BCB19E
@@ -505,86 +511,45 @@ Wire Wire Line
 	4675 6170 4925 6170
 Wire Wire Line
 	4825 6620 4825 6570
-NoConn ~ 5230 3470
-NoConn ~ 5230 3570
-NoConn ~ 5230 3670
-NoConn ~ 5230 3770
-NoConn ~ 5230 4070
-NoConn ~ 5230 4670
-NoConn ~ 5930 4770
-NoConn ~ 5930 4670
-NoConn ~ 5930 4570
-NoConn ~ 5930 4470
-NoConn ~ 5930 4270
-NoConn ~ 5930 3970
-NoConn ~ 5930 3870
-NoConn ~ 5930 3770
-NoConn ~ 5930 3670
-NoConn ~ 5930 3570
-NoConn ~ 5930 3470
-NoConn ~ 5930 4370
-Text GLabel 4785 3970 0    60   Input ~ 0
+NoConn ~ 5320 3530
+NoConn ~ 5320 3630
+NoConn ~ 5320 3730
+NoConn ~ 5320 3830
+NoConn ~ 5320 4130
+NoConn ~ 5320 4730
+NoConn ~ 6020 4830
+NoConn ~ 6020 4730
+NoConn ~ 6020 4630
+NoConn ~ 6020 4530
+NoConn ~ 6020 4330
+NoConn ~ 6020 4030
+NoConn ~ 6020 3930
+NoConn ~ 6020 4430
+Text GLabel 4875 4030 0    60   Input ~ 0
 MCP_INT
 Wire Wire Line
-	4785 3970 5230 3970
-$Comp
-L R R24
-U 1 1 59C972CE
-P 4885 3645
-F 0 "R24" H 4816 3599 50  0000 R CNN
-F 1 "R" H 4816 3690 50  0000 R CNN
-F 2 "" V 4815 3645 50  0001 C CNN
-F 3 "" H 4885 3645 50  0001 C CNN
-	1    4885 3645
-	1    0    0    1   
-$EndComp
+	4875 4030 5320 4030
 $Comp
 L R R25
 U 1 1 59C973F4
-P 5035 3645
-F 0 "R25" H 5105 3691 50  0000 L CNN
-F 1 "R" H 5105 3600 50  0000 L CNN
-F 2 "" V 4965 3645 50  0001 C CNN
-F 3 "" H 5035 3645 50  0001 C CNN
-	1    5035 3645
+P 5030 3658
+F 0 "R25" H 5100 3704 50  0000 L CNN
+F 1 "15K" H 5100 3613 50  0000 L CNN
+F 2 "" V 4960 3658 50  0001 C CNN
+F 3 "" H 5030 3658 50  0001 C CNN
+	1    5030 3658
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4885 3795 4885 3970
-Connection ~ 4885 3970
+	4670 4430 5320 4430
 Wire Wire Line
-	5035 3795 5035 3870
-Connection ~ 5035 3870
-$Comp
-L VCC #PWR?
-U 1 1 59C97A40
-P 4955 3385
-F 0 "#PWR?" H 4955 3235 50  0001 C CNN
-F 1 "VCC" H 4955 3535 50  0000 C CNN
-F 2 "" H 4955 3385 50  0000 C CNN
-F 3 "" H 4955 3385 50  0000 C CNN
-	1    4955 3385
-	1    0    0    -1  
-$EndComp
+	5320 4330 4625 4330
 Wire Wire Line
-	4885 3420 5035 3420
+	4620 4230 5320 4230
 Wire Wire Line
-	4885 3420 4885 3495
+	5320 4830 4670 4830
 Wire Wire Line
-	5035 3420 5035 3495
-Connection ~ 4955 3420
-Wire Wire Line
-	4955 3385 4955 3425
-Wire Wire Line
-	4580 4370 5230 4370
-Wire Wire Line
-	5230 4270 4535 4270
-Wire Wire Line
-	4530 4170 5230 4170
-Wire Wire Line
-	5230 4770 4580 4770
-Wire Wire Line
-	5930 4070 6535 4070
+	6020 4130 6625 4130
 $Comp
 L GND #PWR?
 U 1 1 59ECEF91
@@ -598,6 +563,49 @@ F 3 "" H 10190 1425 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	10190 1350 10190 1425
-NoConn ~ 5930 4870
-NoConn ~ 5230 4870
+NoConn ~ 6020 4930
+NoConn ~ 5320 4930
+$Comp
+L VCC #PWR?
+U 1 1 59F9064F
+P 5030 3470
+F 0 "#PWR?" H 5030 3320 50  0001 C CNN
+F 1 "VCC" H 5030 3620 50  0000 C CNN
+F 2 "" H 5030 3470 50  0000 C CNN
+F 3 "" H 5030 3470 50  0000 C CNN
+	1    5030 3470
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5030 3470 5030 3520
+Wire Wire Line
+	5030 3810 5030 3930
+Connection ~ 5030 3930
+$Comp
+L VCC #PWR?
+U 1 1 59F90C41
+P 6020 3830
+F 0 "#PWR?" H 6020 3680 50  0001 C CNN
+F 1 "VCC" H 6020 3980 50  0000 C CNN
+F 2 "" H 6020 3830 50  0000 C CNN
+F 3 "" H 6020 3830 50  0000 C CNN
+	1    6020 3830
+	0    1    1    0   
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 59F90D0D
+P 6020 3630
+F 0 "#PWR?" H 6020 3380 50  0001 C CNN
+F 1 "GND" H 6020 3480 50  0000 C CNN
+F 2 "" H 6020 3630 50  0000 C CNN
+F 3 "" H 6020 3630 50  0000 C CNN
+	1    6020 3630
+	0    -1   -1   0   
+$EndComp
+NoConn ~ 6020 3530
+Text GLabel 6630 3730 2    60   Input ~ 0
+Reset
+Wire Wire Line
+	6020 3730 6630 3730
 $EndSCHEMATC

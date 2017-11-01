@@ -1,9 +1,13 @@
-EESchema Schematic File Version 3
+EESchema Schematic File Version 2
 LIBS:HotAirGun-rescue
 LIBS:power
 LIBS:device
+LIBS:transistors
+LIBS:conn
 LIBS:linear
 LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
@@ -18,16 +22,18 @@ LIBS:audio
 LIBS:interface
 LIBS:digital-audio
 LIBS:philips
+LIBS:display
 LIBS:cypress
 LIBS:siliconi
 LIBS:opto
 LIBS:atmel
 LIBS:contrib
-LIBS:w_connectors
+LIBS:valves
 LIBS:max6675
 LIBS:lcd16x2
+LIBS:switches
 LIBS:HotAirGun-cache
-EELAYER 26 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -169,7 +175,7 @@ F 3 "" H 6680 4140 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L MOC3032M U2
+L MOC3032M-RESCUE-HotAirGun U2
 U 1 1 59BB46B7
 P 4530 4340
 F 0 "U2" H 4330 4540 50  0000 L CNN
