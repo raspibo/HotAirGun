@@ -5,11 +5,11 @@
 
 //Parameter definition
 #define		D_MinT		100
-#define		D_MaxT		400
-#define		D_TempGun	103
+#define		D_MaxT		450
+#define		D_TempGun	100
 #define		D_AirFlow	89	
-#define		D_AirFlowMin	41
-#define		D_AirFlowMax	104
+#define		D_AirFlowMin	40
+#define		D_AirFlowMax	100
 #define		D_Min_Pid	0
 #define		D_Max_Pid	100
 #define		D_AutoOffTime	3600
