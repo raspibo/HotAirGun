@@ -6,16 +6,13 @@
 //Parameter definition
 #define		D_MinT		100
 #define		D_MaxT		400
-#define		D_AirFlow	100
-#define		D_AirFlowMin	40
-#define		D_AirFlowMax	100
-#define		D_LcdContMin	50
-#define		D_LcdContMax	255
-#define 	ParMax			6
-#define		ParMin			0
-#define		D_Min_Pid		0
-#define		D_Max_Pid		100
-#define		D_AutoOffTime	-3600
+#define		D_TempGun	103
+#define		D_AirFlow	89	
+#define		D_AirFlowMin	41
+#define		D_AirFlowMax	104
+#define		D_Min_Pid	0
+#define		D_Max_Pid	100
+#define		D_AutoOffTime	3600
 
 #define		LCD_Update	100
 #define		PID_Update	100
@@ -23,8 +20,8 @@
 #define 	PidTime   	100      //Period 1 sec
 #define 	TStop     	25
 #define 	Kp           	1
-#define 	Ki           	2
-#define 	Kd           	6
+#define 	Ki           	5
+#define 	Kd           	0
 #define 	SumE_Min     	-1200
 #define 	SumE_Max     	1200
 #define 	PidOutMin    	0
@@ -493,6 +490,20 @@ signed int TempC(){
 
 }
 
+bool checkemptyeeprom() {
+int x=0;
+int param=0;
+int retval=0;
+for (x=0; x < EEPROM.length(); x++) {
+  param=EEPROM.read(x);
+  //Serial.println(param);
+  if (param!=0) {
+	retval=1;
+  }
+ }
+ return retval;
+}
+
 void setup() {
 	Serial.begin(2000000);
 	//Serial.print("Startup");
@@ -506,6 +517,25 @@ void setup() {
 	contr.print("Hot Air Gun");
 	contr.setCursor(0,1);
 	contr.print("Wait....");
+	if (checkemptyeeprom()==0) {
+	ModVal=D_TempGun;
+	menu=31;saveParMenu();
+	ModVal=D_AirFlow;
+	menu=32;saveParMenu();
+	ModVal=KP;	
+	menu=61;saveParMenu();
+	ModVal=KI;	
+	menu=62;saveParMenu();
+	ModVal=KD;
+	menu=63;saveParMenu();
+	ModVal=D_MinT;
+	menu=64;saveParMenu();
+	ModVal=D_MaxT;
+	menu=65;saveParMenu();
+	ModVal=D_AutoOffTime;
+	menu=111;saveParMenu();	
+	Serial.println("EEPROM empty! Saving default values");
+	};
 	TempGun = EEPROM.read(M_Temp1);
 	TempGun = (TempGun << 8) + EEPROM.read(M_Temp);
 	AirFlow = EEPROM.read(M_AirFlow);
@@ -521,8 +551,6 @@ void setup() {
 	AutoOffTime = EEPROM.read(M_AutoOffTime1);
 	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
 	AutoOffTime *= -1;	//Convert to negative
-	//Serial.print("Autoofftime: ");
-	//Serial.println(AutoOffTime);
 	if (TempGun > D_MaxT) TempGun = D_MaxT;
 	if (AirFlow < D_AirFlow) AirFlow = D_AirFlow;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -533,7 +561,6 @@ void setup() {
 	if (KD > D_Max_Pid) KD = D_Max_Pid;
 	if (MinT < D_MinT) MinT = D_MinT;
 	if (MaxT > D_MaxT) MaxT = D_MaxT;
-
 	contr.setupEncoder(EN_A,EN_B,EN_C); // Encoder setup 
 	uint8_t btnCross[BTN_NUM] = { BTN_1, BTN_2, BTN_3, BTN_4, BTN_5}; // Five button on cross disposition, setup function
 	contr.setIntCross(btnCross, BTN_NUM);
