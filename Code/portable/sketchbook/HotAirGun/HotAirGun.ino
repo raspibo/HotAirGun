@@ -69,6 +69,8 @@
 #define SCK	7    //MAX6675 signal clock
 #define PULSE 0x0F   //trigger pulse width (counts)
 
+#define EMERG_RELAY  10 //Emergency relay
+
 #define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
 int lstate = 0;
 
@@ -140,6 +142,8 @@ int nextEventTime=0;
 int actTime=0;
 uint8_t curveInd=0;     //operation index for tempCurve array
 boolean weldCycle=0;    //indicate if weld cycle temp is active
+
+long last_PIDTime=0;
 
 int X=0;
 /*
@@ -435,6 +439,7 @@ void PID (void)    //Controllo PID
 	if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
 	if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
 	TCNT_timer=63060+Pid_Res;
+	last_PIDTime=millis();
 }
 
 
@@ -484,10 +489,7 @@ signed int TempC(){
   }
 
   v >>= 3;
-
   return v*0.25;
-
-
 }
 
 bool checkemptyeeprom() {
@@ -502,6 +504,39 @@ for (x=0; x < EEPROM.length(); x++) {
   }
  }
  return retval;
+}
+
+bool checkerror() {
+  if (ActTemp==-200) {
+	contr.setCursor(0,1);
+	contr.print("E: MAX6675 timeout");	
+	Serial.println("Error: MAX6675 IC not responding!");
+	return 1;
+  } 
+  if (ActTemp==-100) {
+	contr.setCursor(0,1);
+	contr.print("E: Temp sens. disc");	
+	Serial.println("Error: Temperature sensor disconnected!");
+	return 1;
+  } 
+   if (ActTemp>=MaxT) {
+	contr.setCursor(0,1);
+	contr.print("E: Temp > Max_T");	
+	Serial.println("Error: Temperature too high > MaxT!");
+	return 1;
+  }
+  if (millis() > 3000 && millis()>=last_PIDTime+2000) {
+	contr.setCursor(0,1);
+	contr.print("E: Zero cross KO");	
+	Serial.print(millis());
+	Serial.print("\t");
+	Serial.print(last_PIDTime);
+	Serial.print("\t");
+	Serial.println("Error: Zero crossing circuit error!");
+	return 1;
+  } 
+
+return 0;
 }
 
 void setup() {
@@ -582,6 +617,7 @@ void setup() {
 	pinMode(SO, INPUT);
 	digitalWrite(CS, HIGH);
 
+
 	//Set TMR1 related registers, used for Triac driving
 	//Useful info at http://forum.arduino.cc/index.php?topic=94100.0
 	//TIMSK1 Timer Interrupt Mask Register
@@ -607,9 +643,19 @@ void setup() {
 	//TCCR2B – Timer/Counter2 Control Register B
 	//CS22:0: Clock Select -> CS22 Clock quartz/64 by prescaler. Required by 8 bit counter.
 	TCCR2B = _BV(CS22);
+	
+	pinMode(EMERG_RELAY, OUTPUT);
+	digitalWrite(EMERG_RELAY, HIGH);
 }
 
 void loop() {
+	//Error and emergengy handling function
+	if (checkerror()==1) {
+		TempGun=0;
+		AirFlow=100;
+		digitalWrite(EMERG_RELAY,LOW);
+		exit(0);
+	}
 	if (DoPid) {					//Check if PID recalc is needed(recalc after 1 second) 
 		PID();					
 		DoPid=0;
@@ -618,6 +664,7 @@ void loop() {
 		Serial.print(TempGun);
 		Serial.print("\t");
 		Serial.println(Pid_Res);
+		
 	} else {
 
 		if (awakenByMCPInterrupt) {
