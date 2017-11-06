@@ -644,7 +644,6 @@ void setup() {
 	TCCR2B = _BV(CS22);
 	
 	pinMode(EMERG_RELAY, OUTPUT);
-	digitalWrite(EMERG_RELAY, HIGH);
 }
 
 void loop() {
@@ -652,17 +651,20 @@ void loop() {
 	if (checkerror()==1) {
 		TempGun=0;
 		AirFlow=100;
-		digitalWrite(EMERG_RELAY,LOW);
+		digitalWrite(EMERG_RELAY,LOW);		//Disable power to gun
 		exit(0);
 	}
 	if (DoPid) {					//Check if PID recalc is needed(recalc after 1 second) 
 		if (digitalRead(STARTSTOP)==1) {
-			TempGun=TempGunApp;
 			AirFlow=AirFlowApp;
+			delay(2000);
+			digitalWrite(EMERG_RELAY,HIGH);		//Disable power to gun
+			TempGun=TempGunApp;
 		} else {
 			TempGun=0;
 			if (ActTemp<D_MinT) {		//When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
 				AirFlow=0;
+				digitalWrite(EMERG_RELAY,LOW);		//Disable power to gun
 			}
 		}
 		PID();					
