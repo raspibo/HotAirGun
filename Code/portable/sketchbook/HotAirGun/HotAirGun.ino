@@ -4,10 +4,10 @@
 #include <EEPROM.h>
 
 //Parameter definition
-#define		D_MinT		100
+#define		D_MinT		25	
 #define		D_MaxT		450
-#define		D_TempGun	100
-#define		D_AirFlow	89	
+#define		D_TempGunApp	100
+#define		D_AirFlowApp	100		
 #define		D_AirFlowMin	40
 #define		D_AirFlowMax	100
 #define		D_Min_Pid	0
@@ -62,7 +62,7 @@
 
 
 #define DEBUGLED     13 //Led used for debug purpose
-#define DEBUGPIN     12 //Pin used for debug purpose with logic analyzer
+#define STARTSTOP    12 //Pin used for activation of hot air production (also used for magnetic sensor on gun)
 #define GATE	9    //TRIAC gate
 #define SO	5    //MAX6675 signal serial out aka MISO on SPI
 #define CS 	6    //MAX6675 signal Chip select
@@ -110,10 +110,6 @@ int MinT = 30;
 int AutoOffTime;		//Time for auto shutdown in seconds
 
 char KI, KD, KP;
-//double DActTemp, DPidOut , DTempGun;
-//char LcdPar, HLcdPar;
-//char Time1, Time2;
-//boolean MPStart, MPStop, StartCiclo;
 
 //Pid Var
 bool DoPid=0;			//Set to true if it's time to recalculate PID
@@ -127,9 +123,11 @@ boolean state;
 #define MENU_TITLES 12 
 boolean initPar=false;
 
-int ActTemp=185;		//Actual gun air temp
-int TempGun=251;	//Target temperature for PID, at work the air flow with this temp from gun
-int AirFlow=100;
+int ActTemp=0;		//Actual gun air temp
+int TempGunApp=0;	//Target temperature for PID temporary variable when weld cycle is not active
+int TempGun=0;		//Target temperature for PID, at work the air flow with this temp from gun
+int AirFlowApp=0;	//Temporary variable for air flow when weld cycle is not active
+int AirFlow=0;
 
 int menu=MENU_HOME;
 int menudec,menuunit;
@@ -327,8 +325,8 @@ ISR(TIMER1_OVF_vect){ //timer1 overflow
 void modParMenu() {
 	if (!initPar){		        //First: set Modval with actual value of parameter
 		switch (menu) {
-			case 21:	ModVal  = TempGun;	break;
-			case 22:	ModVal  = AirFlow;	break;
+			case 21:	ModVal  = TempGunApp;	break;
+			case 22:	ModVal  = AirFlowApp;	break;
 			case 51:	ModVal  = KP;		break;
 			case 52:	ModVal  = KI;		break;
 			case 53:	ModVal  = KD;		break;
@@ -360,8 +358,8 @@ void modParMenu() {
 }
 void saveParMenu() {
 	switch (menu) {		//Third: save valid modified parameter on eeprom
-		case 31: 	TempGun = ModVal;	EEPROM.write(M_Temp, TempGun); 		EEPROM.write(M_Temp1, (TempGun >> 8));	break;					//Save long value  to two eeprom memory bytes.
-		case 32: 	AirFlow = ModVal;	EEPROM.write(M_AirFlow, AirFlow); 	break;
+		case 31: 	TempGunApp = ModVal;	EEPROM.write(M_Temp, TempGunApp); 		EEPROM.write(M_Temp1, (TempGunApp >> 8));	break;					//Save long value  to two eeprom memory bytes.
+		case 32: 	AirFlowApp = ModVal;	EEPROM.write(M_AirFlow, AirFlowApp); 	break;
 		case 61: 	KP 	= ModVal;	EEPROM.write(M_KP, KP);			break;
 		case 62: 	KI 	= ModVal;  	EEPROM.write(M_KI, KI);			break;
 		case 63: 	KD 	= ModVal;	EEPROM.write(M_KD, KD);			break;
@@ -374,11 +372,11 @@ void saveParMenu() {
 
 void setMac() {
 	switch (menu) {
-		case 71: 	TempGun = 300;	AirFlow=80; break;           //Example for predefined temp and air flow for Sn
-		case 72: 	TempGun = 120;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function heat shrink tubing
-		case 73: 	TempGun = 270;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld LDPE 
-		case 74: 	TempGun = 300;	AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
-		case 75:	TempGun = 350;  AirFlow=100; break;          //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
+		case 71: 	TempGunApp = 300;	AirFlowApp=80; break;           //Example for predefined temp and air flow for Sn
+		case 72: 	TempGunApp = 120;	AirFlowApp=100; break;          //Example for predefined temp and air flow for a specific function heat shrink tubing
+		case 73: 	TempGunApp = 270;	AirFlowApp=100; break;          //Example for predefined temp and air flow for a specific function weld LDPE 
+		case 74: 	TempGunApp = 300;	AirFlowApp=100; break;          //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
+		case 75:	TempGunApp = 350;  	AirFlowApp=100; break;          //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
 
 		case 81:	weldCycle=1;	break;			     //Set weldCycle var now at every loop weldCurve routine is checked to the end of temperature weld cycle
 	}  
@@ -525,7 +523,7 @@ bool checkerror() {
 	Serial.println("Error: Temperature too high > MaxT!");
 	return 1;
   }
-  if (millis() > 3000 && millis()>=last_PIDTime+2000) {
+  if (millis() > 3000 && millis()>=last_PIDTime+2000 && digitalRead(STARTSTOP)==1) {
 	contr.setCursor(0,1);
 	contr.print("E: Zero cross KO");	
 	Serial.print(millis());
@@ -553,9 +551,9 @@ void setup() {
 	contr.setCursor(0,1);
 	contr.print("Wait....");
 	if (checkemptyeeprom()==0) {
-	ModVal=D_TempGun;
+	ModVal=D_TempGunApp;
 	menu=31;saveParMenu();
-	ModVal=D_AirFlow;
+	ModVal=D_AirFlowApp;
 	menu=32;saveParMenu();
 	ModVal=KP;	
 	menu=61;saveParMenu();
@@ -571,9 +569,10 @@ void setup() {
 	menu=111;saveParMenu();	
 	Serial.println("EEPROM empty! Saving default values");
 	};
-	TempGun = EEPROM.read(M_Temp1);
-	TempGun = (TempGun << 8) + EEPROM.read(M_Temp);
-	AirFlow = EEPROM.read(M_AirFlow);
+	TempGunApp = EEPROM.read(M_Temp1);
+	TempGunApp = (TempGunApp << 8) + EEPROM.read(M_Temp);
+	TempGun=0;
+	AirFlowApp = EEPROM.read(M_AirFlow);
 	//Serial.print("Setup AirFlow:");
 	//Serial.println(AirFlow);
 	KP = EEPROM.read(M_KP);
@@ -586,8 +585,8 @@ void setup() {
 	AutoOffTime = EEPROM.read(M_AutoOffTime1);
 	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
 	AutoOffTime *= -1;	//Convert to negative
-	if (TempGun > D_MaxT) TempGun = D_MaxT;
-	if (AirFlow < D_AirFlow) AirFlow = D_AirFlow;
+	if (TempGunApp > D_MaxT) TempGunApp = D_MaxT;
+	if (AirFlowApp < D_AirFlowApp) AirFlowApp = D_AirFlowApp;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
 	if (KP > D_Max_Pid) KP = D_Max_Pid;
 	if (KI < D_Min_Pid) KI = D_Min_Pid;
@@ -607,7 +606,7 @@ void setup() {
 
 	menu=MENU_HOME;
 	pinMode(DEBUGLED, OUTPUT);
-	pinMode(DEBUGPIN, OUTPUT);
+	pinMode(STARTSTOP, INPUT);
 	pinMode(P_FAN_PWM, OUTPUT);
 	pinMode(GATE, OUTPUT);
 
@@ -657,13 +656,24 @@ void loop() {
 		exit(0);
 	}
 	if (DoPid) {					//Check if PID recalc is needed(recalc after 1 second) 
+		if (digitalRead(STARTSTOP)==1) {
+			TempGun=TempGunApp;
+			AirFlow=AirFlowApp;
+		} else {
+			TempGun=0;
+			if (ActTemp<D_MinT) {		//When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
+				AirFlow=0;
+			}
+		}
 		PID();					
 		DoPid=0;
 		Serial.print(ActTemp);
 		Serial.print("\t");
 		Serial.print(TempGun);
 		Serial.print("\t");
-		Serial.println(Pid_Res);
+		Serial.print(Pid_Res);
+		Serial.print("\t");
+		Serial.println(digitalRead(STARTSTOP));
 		
 	} else {
 
@@ -740,9 +750,11 @@ void loop() {
 
 			if (opTime < AutoOffTime ) {  //Shutdown if inactive, other settings are required.....
 				TempGun=0;
+				TempGunApp=0;
 				contr.setCursor(0, 1);
 				contr.print("Auto Power OFF");
 				AirFlow=100;
+				AirFlowApp=100;
 				//Serial.println("Auto Power OFF");
 				if (ActTemp<=40) {
 					AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
