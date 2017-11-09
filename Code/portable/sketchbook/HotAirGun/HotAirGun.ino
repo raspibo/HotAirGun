@@ -143,6 +143,10 @@ boolean weldCycle=0;    //indicate if weld cycle temp is active
 
 long last_PIDTime=0;
 
+boolean StartStop, PrevStartStop;
+uint8_t WeldStatus;
+long relayStartTime=0;
+
 int X=0;
 /*
    First char convention for menu voice handling:
@@ -313,7 +317,9 @@ ISR(TIMER1_OVF_vect){ //timer1 overflow
   if (digitalRead(GATE)==0) {
   TCNT1H = 0xFF;  
   TCNT1L = 0xFF - PULSE;
-  digitalWrite(GATE,HIGH); //turn on TRIAC gate
+  if (digitalRead(STARTSTOP)==1 && Pid_Res > 10 && AirFlow > D_AirFlowMin && TempGun!=0) { //Check if STARTSTOP button is pressed > welding active and some controls to vars
+	digitalWrite(GATE,HIGH); //turn on TRIAC gate
+  }
 } else {
   digitalWrite(GATE,LOW); //turn off TRIAC gate
   TIMSK1 &= ~(1<<TOIE1);
@@ -537,6 +543,37 @@ bool checkerror() {
 return 0;
 }
 
+void startstop() {						//Handler for start/stop button
+		StartStop=digitalRead(STARTSTOP);
+		if (StartStop!=PrevStartStop) {			//StartStop button change, status check
+			bitWrite(WeldStatus, 0,StartStop); 
+			bitWrite(WeldStatus, 1,PrevStartStop); 
+			switch(WeldStatus) {
+                                case 1: //01
+				AirFlow=AirFlowApp;
+				if (relayStartTime==0) {
+					relayStartTime=millis()+2000;   //Calculate delay from now and relay activation
+				}
+                                break;
+                                case 2: //10
+				relayStartTime=0;		//Reset Relay activation time count
+				TempGun=0;			//Set TempGun to 0 -> shutdown triac, do not change
+				delay(150);
+				digitalWrite(EMERG_RELAY,LOW);  //Disable power to gun
+				if (ActTemp<D_MinT) {		//When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
+					AirFlow=0;
+				}
+                                break;
+			}	
+			PrevStartStop=StartStop;
+		}
+			if (WeldStatus==1 && millis() > relayStartTime ) {
+				digitalWrite(EMERG_RELAY,HIGH);         //Enable power to gun
+				TempGun=TempGunApp;
+				relayStartTime=0;
+			}
+}
+
 void setup() {
 	Serial.begin(2000000);
 	//Serial.print("Startup");
@@ -652,21 +689,11 @@ void loop() {
 		TempGun=0;
 		AirFlow=100;
 		digitalWrite(EMERG_RELAY,LOW);		//Disable power to gun
+		Serial.println("Shutdown after error!");
 		exit(0);
 	}
 	if (DoPid) {					//Check if PID recalc is needed(recalc after 1 second) 
-		if (digitalRead(STARTSTOP)==1) {
-			AirFlow=AirFlowApp;
-			delay(2000);
-			digitalWrite(EMERG_RELAY,HIGH);		//Disable power to gun
-			TempGun=TempGunApp;
-		} else {
-			TempGun=0;
-			if (ActTemp<D_MinT) {		//When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
-				AirFlow=0;
-				digitalWrite(EMERG_RELAY,LOW);		//Disable power to gun
-			}
-		}
+
 		PID();					
 		DoPid=0;
 		Serial.print(ActTemp);
@@ -678,7 +705,7 @@ void loop() {
 		Serial.println(digitalRead(STARTSTOP));
 		
 	} else {
-
+		startstop();
 		if (awakenByMCPInterrupt) {
 			handleMCPInterrupt();		//Handle low priority interrupt (user interface: encoder, switch) if fired
 		} else {
