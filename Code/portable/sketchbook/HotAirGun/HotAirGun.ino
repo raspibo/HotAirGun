@@ -72,7 +72,7 @@
 #define GATE		9	//TRIAC gate
 #define EMERG_RELAY	10	//Emergency and power relay
 #define P_FAN_PWM 	11	//Define pin D10 for pwm signal for gun
-#define STARTSTOP	12	//Pin used for activation of hot air production (also used for magnetic sensor on gun)
+#define _STARTSTOP	12	//Pin used for activation of hot air production (also used for magnetic sensor on gun)
 #define DEBUGLED     	13	//Led used for debug purpose
 
 #define PULSE 0x0F   //trigger pulse width (counts)
@@ -264,12 +264,14 @@ void handleMCPInterrupt() {
 				//Serial.print("Button: A");
 				//Serial.println(intPin);
 				controllerEvent=CONTR_BTN;
-				if (intPin==4 && ActTemp > 0) { //Only for debug purpose simulate temp change
-					ActTemp--;   //Only for debug purpose simulate temp change
-				}                    //Only for debug purpose simulate temp change
-				if (intPin==6 && ActTemp < 500) { //Only for debug purpose simulate temp change
-					ActTemp++;   //Only for debug purpose simulate temp change
-				}                    //Only for debug purpose simulate temp change
+#ifndef STARTSTOP
+				if (intPin==4) {	//Use button as start welding controller
+					StartStop=1;
+				}                    
+				if (intPin==6) {	//Use button as stop welding controller
+					StartStop=0;
+				}                    
+#endif
 			}
 			break;
 	}
@@ -324,7 +326,7 @@ ISR(TIMER1_OVF_vect){ //timer1 overflow
 	if (digitalRead(GATE)==0) {
 		TCNT1H = 0xFF;  
 		TCNT1L = 0xFF - PULSE;
-		if (digitalRead(STARTSTOP)==1 && Pid_Res > 10 && AirFlow > D_AirFlowMin && TempGun!=0) { //Check if STARTSTOP button is pressed > welding active and some controls to vars
+		if (StartStop==1 && Pid_Res > 10 && AirFlow > D_AirFlowMin && TempGun!=0) { //Check if StartStop var is active > welding active and some controls to vars
 			digitalWrite(GATE,HIGH); //turn on TRIAC gate
 		}
 	} else {
@@ -536,7 +538,7 @@ bool checkerror() {
 		Serial.println("Error: Temperature too high > MaxT!");
 		return 1;
 	}
-	if (millis() > 3000 && millis()>=last_PIDTime+2000 && digitalRead(STARTSTOP)==1) {
+	if (millis() > 3000 && millis()>=last_PIDTime+2000 && StartStop==1) {
 		contr.setCursor(0,1);
 		contr.print("E: Zero cross KO");	
 		Serial.print(millis());
@@ -551,7 +553,9 @@ bool checkerror() {
 }
 
 void startstop() {						//Handler for start/stop button
+#ifdef STARTSTOP	
 	StartStop=digitalRead(STARTSTOP);
+#endif
 	if (StartStop!=PrevStartStop) {			//StartStop button change, status check
 		bitWrite(WeldStatus, 0,StartStop); 
 		bitWrite(WeldStatus, 1,PrevStartStop); 
@@ -657,7 +661,9 @@ void setup() {
 	pinMode(GATE, 		OUTPUT);
 	pinMode(EMERG_RELAY, 	OUTPUT);
 	pinMode(P_FAN_PWM, 	OUTPUT);
+#ifdef STARTSTOP	
 	pinMode(STARTSTOP, 	INPUT);
+#endif	
 	pinMode(DEBUGLED, 	OUTPUT);
 
 	//define pin modes MAX6675
@@ -714,7 +720,7 @@ void loop() {
 		Serial.print("\t");
 		Serial.print(Pid_Res);
 		Serial.print("\t");
-		Serial.println(digitalRead(STARTSTOP));
+		Serial.println(StartStop);
 
 	} else {
 		startstop();
@@ -739,6 +745,8 @@ void loop() {
 				contr.print(" A:");
 				contr.print(AirFlow);
 				contr.print("%");
+				contr.setCursor(15, 0);
+				if (StartStop==1) { contr.print("W");} else { contr.print("S");}
 				contr.setCursor(0, 1);
 				if (weldCycle>0) { contr.print("t:"); contr.print(opTime); } else {contr.print("o:"); contr.print(opTime);}
 				LcdUpd=millis();
