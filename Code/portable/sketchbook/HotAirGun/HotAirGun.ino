@@ -295,35 +295,35 @@ void ZeroCCallBack() {			//High priority interrupt, only minimal operation and n
 		phaseCounter=0;
 		DoPid=1;
 	}
-/*	TCNT_timer=63450; // 2ms
-	TCNT_timer=64000; // 4ms 
-	TCNT_timer=65000; // 8ms 
-	TCNT_timer=63000; //NC
-	TCNT_timer=63200; // 645us
-	TCNT_timer=63100; // 250us
-	TCNT_timer=63080; // 150us
-	TCNT_timer=63060; // 79us
-*/
+	/*	TCNT_timer=63450; // 2ms
+		TCNT_timer=64000; // 4ms 
+		TCNT_timer=65000; // 8ms 
+		TCNT_timer=63000; //NC
+		TCNT_timer=63200; // 645us
+		TCNT_timer=63100; // 250us
+		TCNT_timer=63080; // 150us
+		TCNT_timer=63060; // 79us
+	 */
 	//TCNT_timer=63060+Pid_Res;  
-	
-        TCNT1H = TCNT_timer >> 8;  
-        TCNT1L = TCNT_timer & 0x00FF;
-        TIMSK1 |= (1<<TOIE1);
+
+	TCNT1H = TCNT_timer >> 8;  
+	TCNT1L = TCNT_timer & 0x00FF;
+	TIMSK1 |= (1<<TOIE1);
 	//we set callback for the arduino INT handler.
 	attachInterrupt(arduinoZeroCInterrupt, ZeroCCallBack, RISING);
 }
 
 ISR(TIMER1_OVF_vect){ //timer1 overflow
-  if (digitalRead(GATE)==0) {
-  TCNT1H = 0xFF;  
-  TCNT1L = 0xFF - PULSE;
-  if (digitalRead(STARTSTOP)==1 && Pid_Res > 10 && AirFlow > D_AirFlowMin && TempGun!=0) { //Check if STARTSTOP button is pressed > welding active and some controls to vars
-	digitalWrite(GATE,HIGH); //turn on TRIAC gate
-  }
-} else {
-  digitalWrite(GATE,LOW); //turn off TRIAC gate
-  TIMSK1 &= ~(1<<TOIE1);
-}
+	if (digitalRead(GATE)==0) {
+		TCNT1H = 0xFF;  
+		TCNT1L = 0xFF - PULSE;
+		if (digitalRead(STARTSTOP)==1 && Pid_Res > 10 && AirFlow > D_AirFlowMin && TempGun!=0) { //Check if STARTSTOP button is pressed > welding active and some controls to vars
+			digitalWrite(GATE,HIGH); //turn on TRIAC gate
+		}
+	} else {
+		digitalWrite(GATE,LOW); //turn off TRIAC gate
+		TIMSK1 &= ~(1<<TOIE1);
+	}
 }
 
 
@@ -448,114 +448,114 @@ void PID (void)    //Controllo PID
 
 
 byte TC_Read(void) { 
-  int i;
-  byte d = 0;
+	int i;
+	byte d = 0;
 
-  for (i=7; i>=0; i--)
-  {
-    digitalWrite(SCK, LOW);
-    _delay_ms(1);
-    if (digitalRead(SO)) {
-      //set the bit to 0 no matter what
-      d |= (1 << i);
-    }
+	for (i=7; i>=0; i--)
+	{
+		digitalWrite(SCK, LOW);
+		_delay_ms(1);
+		if (digitalRead(SO)) {
+			//set the bit to 0 no matter what
+			d |= (1 << i);
+		}
 
-    digitalWrite(SCK, HIGH);
-    _delay_ms(1);
-  }
+		digitalWrite(SCK, HIGH);
+		_delay_ms(1);
+	}
 
-  return d;
+	return d;
 }
 
 
 signed int TempC(){
-  uint16_t v;
+	uint16_t v;
 
-  digitalWrite(CS, LOW);
-  _delay_ms(1);
+	digitalWrite(CS, LOW);
+	_delay_ms(1);
 
-  v = TC_Read();
-  v <<= 8;
-  v |= TC_Read();
+	v = TC_Read();
+	v <<= 8;
+	v |= TC_Read();
 
-  digitalWrite(CS, HIGH);
+	digitalWrite(CS, HIGH);
 
-  if (v & 0x2) {
-    //no MAX6675
-    return -200; 
-    //return -100;
-  }
+	if (v & 0x2) {
+		//no MAX6675
+		return -200; 
+		//return -100;
+	}
 
-  if (v & 0x4) {
-    //no thermocouple attached
-    return -100; 
-    //return -100;
-  }
+	if (v & 0x4) {
+		//no thermocouple attached
+		return -100; 
+		//return -100;
+	}
 
-  v >>= 3;
-  return v*0.25;
+	v >>= 3;
+	return v*0.25;
 }
 
 bool checkemptyeeprom() {
-int x=0;
-int param=0;
-int retval=0;
-for (x=0; x < EEPROM.length(); x++) {
-  param=EEPROM.read(x);
-  //Serial.println(param);
-  if (param!=0) {
-	retval=1;
-  }
- }
- return retval;
+	int x=0;
+	int param=0;
+	int retval=0;
+	for (x=0; x < EEPROM.length(); x++) {
+		param=EEPROM.read(x);
+		//Serial.println(param);
+		if (param!=0) {
+			retval=1;
+		}
+	}
+	return retval;
 }
 
 bool checkerror() {
-  if (ActTemp==-200) {
-	contr.setCursor(0,1);
-	contr.print("E: MAX6675 timeout");	
-	Serial.println("Error: MAX6675 IC not responding!");
-	return 1;
-  } 
-  if (ActTemp==-100) {
-	contr.setCursor(0,1);
-	contr.print("E: Temp sens. disc");	
-	Serial.println("Error: Temperature sensor disconnected!");
-	return 1;
-  } 
-   if (ActTemp>=MaxT) {
-	contr.setCursor(0,1);
-	contr.print("E: Temp > Max_T");	
-	Serial.println("Error: Temperature too high > MaxT!");
-	return 1;
-  }
-  if (millis() > 3000 && millis()>=last_PIDTime+2000 && digitalRead(STARTSTOP)==1) {
-	contr.setCursor(0,1);
-	contr.print("E: Zero cross KO");	
-	Serial.print(millis());
-	Serial.print("\t");
-	Serial.print(last_PIDTime);
-	Serial.print("\t");
-	Serial.println("Error: Zero crossing circuit error!");
-	return 1;
-  } 
+	if (ActTemp==-200) {
+		contr.setCursor(0,1);
+		contr.print("E: MAX6675 timeout");	
+		Serial.println("Error: MAX6675 IC not responding!");
+		return 1;
+	} 
+	if (ActTemp==-100) {
+		contr.setCursor(0,1);
+		contr.print("E: Temp sens. disc");	
+		Serial.println("Error: Temperature sensor disconnected!");
+		return 1;
+	} 
+	if (ActTemp>=MaxT) {
+		contr.setCursor(0,1);
+		contr.print("E: Temp > Max_T");	
+		Serial.println("Error: Temperature too high > MaxT!");
+		return 1;
+	}
+	if (millis() > 3000 && millis()>=last_PIDTime+2000 && digitalRead(STARTSTOP)==1) {
+		contr.setCursor(0,1);
+		contr.print("E: Zero cross KO");	
+		Serial.print(millis());
+		Serial.print("\t");
+		Serial.print(last_PIDTime);
+		Serial.print("\t");
+		Serial.println("Error: Zero crossing circuit error!");
+		return 1;
+	} 
 
-return 0;
+	return 0;
 }
 
 void startstop() {						//Handler for start/stop button
-		StartStop=digitalRead(STARTSTOP);
-		if (StartStop!=PrevStartStop) {			//StartStop button change, status check
-			bitWrite(WeldStatus, 0,StartStop); 
-			bitWrite(WeldStatus, 1,PrevStartStop); 
-			switch(WeldStatus) {
-                                case 1: //01
+	StartStop=digitalRead(STARTSTOP);
+	if (StartStop!=PrevStartStop) {			//StartStop button change, status check
+		bitWrite(WeldStatus, 0,StartStop); 
+		bitWrite(WeldStatus, 1,PrevStartStop); 
+		switch(WeldStatus) {
+			case 1: //01
 				AirFlow=AirFlowApp;
 				if (relayStartTime==0) {
 					relayStartTime=millis()+2000;   //Calculate delay from now and relay activation
 				}
-                                break;
-                                case 2: //10
+				break;
+			case 2: //10
 				relayStartTime=0;		//Reset Relay activation time count
 				TempGun=0;			//Set TempGun to 0 -> shutdown triac, do not change
 				delay(150);
@@ -563,15 +563,15 @@ void startstop() {						//Handler for start/stop button
 				if (ActTemp<D_MinT) {		//When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
 					AirFlow=0;
 				}
-                                break;
-			}	
-			PrevStartStop=StartStop;
-		}
-			if (WeldStatus==1 && millis() > relayStartTime ) {
-				digitalWrite(EMERG_RELAY,HIGH);         //Enable power to gun
-				TempGun=TempGunApp;
-				relayStartTime=0;
-			}
+				break;
+		}	
+		PrevStartStop=StartStop;
+	}
+	if (WeldStatus==1 && millis() > relayStartTime ) {
+		digitalWrite(EMERG_RELAY,HIGH);         //Enable power to gun
+		TempGun=TempGunApp;
+		relayStartTime=0;
+	}
 }
 
 void setup() {
@@ -588,23 +588,23 @@ void setup() {
 	contr.setCursor(0,1);
 	contr.print("Wait....");
 	if (checkemptyeeprom()==0) {
-	ModVal=D_TempGunApp;
-	menu=31;saveParMenu();
-	ModVal=D_AirFlowApp;
-	menu=32;saveParMenu();
-	ModVal=KP;	
-	menu=61;saveParMenu();
-	ModVal=KI;	
-	menu=62;saveParMenu();
-	ModVal=KD;
-	menu=63;saveParMenu();
-	ModVal=D_MinT;
-	menu=64;saveParMenu();
-	ModVal=D_MaxT;
-	menu=65;saveParMenu();
-	ModVal=D_AutoOffTime;
-	menu=111;saveParMenu();	
-	Serial.println("EEPROM empty! Saving default values");
+		ModVal=D_TempGunApp;
+		menu=31;saveParMenu();
+		ModVal=D_AirFlowApp;
+		menu=32;saveParMenu();
+		ModVal=KP;	
+		menu=61;saveParMenu();
+		ModVal=KI;	
+		menu=62;saveParMenu();
+		ModVal=KD;
+		menu=63;saveParMenu();
+		ModVal=D_MinT;
+		menu=64;saveParMenu();
+		ModVal=D_MaxT;
+		menu=65;saveParMenu();
+		ModVal=D_AutoOffTime;
+		menu=111;saveParMenu();	
+		Serial.println("EEPROM empty! Saving default values");
 	};
 	TempGunApp = EEPROM.read(M_Temp1);
 	TempGunApp = (TempGunApp << 8) + EEPROM.read(M_Temp);
@@ -658,7 +658,7 @@ void setup() {
 	//Useful info at http://forum.arduino.cc/index.php?topic=94100.0
 	//TIMSK1 Timer Interrupt Mask Register
 	//TOIE Overflow Interrupt disable during setup 
-  	TIMSK1 &= _BV(TOIE1);  
+	TIMSK1 &= _BV(TOIE1);  
 	//TCCR1A – Timer/Counter1 Control Register A
 	//WGM11:0:  Waveform Generation Mode for  timer1
 	//WGM10 = WGM11 = WGM12 = WGM13 = 0 ===>> "Normal mode, only count, no PWM, no fast PWM ecc"  
@@ -669,7 +669,7 @@ void setup() {
 	TIMSK1 &= _BV(OCIE1A);  
 	//CS11 Clock Select -> CS11 Clock quartz with prescaling 8
 	TCCR1B |= (1<<CS11); 
-	
+
 	//Set TMR2 for PWM at 16 MHz, used for fan PWM control
 	//TCCR1A – Timer/Counter1 Control Register A
 	//COM2A1: COM2An: Compare Output Mode for Channel A on non-PWM mode (depend of  WGM2[2:0] bit). Clear OC2A on Compare Match in  
@@ -679,7 +679,7 @@ void setup() {
 	//TCCR2B – Timer/Counter2 Control Register B
 	//CS22:0: Clock Select -> CS22 Clock quartz/64 by prescaler. Required by 8 bit counter.
 	TCCR2B = _BV(CS22);
-	
+
 	pinMode(EMERG_RELAY, OUTPUT);
 }
 
@@ -703,7 +703,7 @@ void loop() {
 		Serial.print(Pid_Res);
 		Serial.print("\t");
 		Serial.println(digitalRead(STARTSTOP));
-		
+
 	} else {
 		startstop();
 		if (awakenByMCPInterrupt) {
