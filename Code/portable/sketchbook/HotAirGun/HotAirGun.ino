@@ -58,18 +58,25 @@
 #define CONTR_BTN    3 // Button pressed
 
 
-#define P_FAN_PWM    11   //Define pin D10 for pwm signal for gun
 
 
-#define DEBUGLED     13 //Led used for debug purpose
-#define STARTSTOP    12 //Pin used for activation of hot air production (also used for magnetic sensor on gun)
-#define GATE	9    //TRIAC gate
-#define SO	5    //MAX6675 signal serial out aka MISO on SPI
-#define CS 	6    //MAX6675 signal Chip select
-#define SCK	7    //MAX6675 signal clock
+//Pin definition
+
+#define ZEROCINTPIN	2	//Interrupt pin used by zero crossing detector circuit DO NOT CHANGE
+#define MCPINTPIN	3	//Interrupt pin used by I2C controller (MCP23107)      DO NOT CHANGE
+
+#define SO		5	//MAX6675 signal serial out aka MISO on SPI
+#define CS		6	//MAX6675 signal Chip select
+#define SCK		7	//MAX6675 signal clock
+#define TILTSENSOR	8	//Tilt sensor for gun
+#define GATE		9	//TRIAC gate
+#define EMERG_RELAY	10	//Emergency and power relay
+#define P_FAN_PWM 	11	//Define pin D10 for pwm signal for gun
+#define STARTSTOP	12	//Pin used for activation of hot air production (also used for magnetic sensor on gun)
+#define DEBUGLED     	13	//Led used for debug purpose
+
 #define PULSE 0x0F   //trigger pulse width (counts)
 
-#define EMERG_RELAY  10 //Emergency relay
 
 #define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
 int lstate = 0;
@@ -88,12 +95,12 @@ char ActEnc, OldEnc;
 
 
 // Interrupts from the MCP will be handled by this PIN on Arduino
-byte MCPIntPin = 3;
+byte MCPIntPin = MCPINTPIN;
 // ... and this intterrupt vector
 byte arduinoMCPInterrupt = 1;
 
 // Interrupts from zero crossing circuit
-byte ZeroCIntPin = 2;
+byte ZeroCIntPin = ZEROCINTPIN;
 // ... and this intterrupt vector
 byte arduinoZeroCInterrupt = 0;
 
@@ -642,10 +649,13 @@ void setup() {
 	handleMCPInterrupt();
 
 	menu=MENU_HOME;
-	pinMode(DEBUGLED, OUTPUT);
-	pinMode(STARTSTOP, INPUT);
-	pinMode(P_FAN_PWM, OUTPUT);
-	pinMode(GATE, OUTPUT);
+
+	pinMode(TILTSENSOR, 	INPUT);
+	pinMode(GATE, 		OUTPUT);
+	pinMode(EMERG_RELAY, 	OUTPUT);
+	pinMode(P_FAN_PWM, 	OUTPUT);
+	pinMode(STARTSTOP, 	INPUT);
+	pinMode(DEBUGLED, 	OUTPUT);
 
 	//define pin modes MAX6675
 	pinMode(CS, OUTPUT);
@@ -680,7 +690,6 @@ void setup() {
 	//CS22:0: Clock Select -> CS22 Clock quartz/64 by prescaler. Required by 8 bit counter.
 	TCCR2B = _BV(CS22);
 
-	pinMode(EMERG_RELAY, OUTPUT);
 }
 
 void loop() {
