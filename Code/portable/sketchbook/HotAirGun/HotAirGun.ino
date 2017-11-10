@@ -574,10 +574,13 @@ void startstop() {						//Handler for start/stop button
 		}	
 		PrevStartStop=StartStop;
 	}
-	if (WeldStatus==1 && millis() > relayStartTime ) {
+	if (WeldStatus==1 && millis() > relayStartTime && digitalRead(TILTSENSOR)==0 ) {
 		digitalWrite(EMERG_RELAY,HIGH);         //Enable power to gun
-		TempGun=TempGunApp;
+		TempGun=D_MinT;
 		relayStartTime=0;
+	}
+	if (WeldStatus==1 && millis() > relayStartTime && digitalRead(TILTSENSOR)==1) {
+		TempGun=TempGunApp;
 	}
 }
 
