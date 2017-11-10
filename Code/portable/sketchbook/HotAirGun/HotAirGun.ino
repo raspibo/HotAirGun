@@ -40,28 +40,32 @@
 #define		M_AutoOffTime   11	
 #define		M_AutoOffTime1  12	
 
-#define EN_A 1 // Encored scroll A0
-#define EN_B 2 // Encoder scroll A1 
-#define EN_C 0 // Encoder click  A2
-#define POTDIVIDER 4 //Encoder tick divider for sensibilty regulation
-#define BTN_NUM 5 // Number of buttons
-#define BTN_1 3 // Single button A3
-#define BTN_2 4 // Single button A4
-#define BTN_3 5 // Single button A5
-#define BTN_4 6 // Single button A6
-#define BTN_5 7 // Single button A7
-
-
-#define CONTR_NOEVENT  0 // No event detected
-#define CONTR_SCROLL 1 // Encoder movement detected -Z > read Pot value
-#define CONTR_CLICK  2 // Encoder click detected 
-#define CONTR_BTN    3 // Button pressed
-
-
-
+//I2cController vars definition
+I2cControllerLib contr(0x20);	// Connect via i2c, default address #0 (A0-A2 not jumpered)
+#define EN_A 1 			// Encored scroll A0
+#define EN_B 2 			// Encoder scroll A1 
+#define EN_C 0 			// Encoder click  A2
+#define POTDIVIDER 4 		// Encoder tick divider for sensibilty regulation
+#define BTN_NUM 5 		// Number of buttons
+#define BTN_1 3 		// Single button A3
+#define BTN_2 4 		// Single button A4
+#define BTN_3 5 		// Single button A5
+#define BTN_4 6 		// Single button A6
+#define BTN_5 7 		// Single button A7
+#define CONTR_NOEVENT  0 	// No event detected
+#define CONTR_SCROLL 1 		// Encoder movement detected -Z > read Pot value
+#define CONTR_CLICK  2 		// Encoder click detected 
+#define CONTR_BTN    3 		// Button pressed
+uint8_t controllerEvent=CONTR_NOEVENT;	//Store encoder events
+int clickcount=0;		
+int ticPot=0;       		//Used for cont of single step of rotary encoder 
+int PotDivider=POTDIVIDER;   	//Divider for ticPot for best regulation of sensitivity
+int Pot=0;			
+char ActEnc, OldEnc;		//Diff between encoder positions
+int ModVal;			//Temporary var to store parameter during set
+boolean initPar=false;		//Used by menus
 
 //Pin definition
-
 #define ZEROCINTPIN	2	//Interrupt pin used by zero crossing detector circuit DO NOT CHANGE
 #define MCPINTPIN	3	//Interrupt pin used by I2C controller (MCP23107)      DO NOT CHANGE
 
@@ -75,86 +79,52 @@
 #define _STARTSTOP	12	//Pin used for activation of hot air production (also used for magnetic sensor on gun)
 #define DEBUGLED     	13	//Led used for debug purpose
 
-#define PULSE 0x0F   //trigger pulse width (counts)
-
-
+//PWM and timers vars
+#define PULSE 0x0F   		//trigger pulse width (counts)
 #define sbi(port,bit) (port)|=(1<<(bit))  //Fast toggle routine for pins
-int lstate = 0;
 
-// Connect via i2c, default address #0 (A0-A2 not jumpered)
-I2cControllerLib contr(0x20);
-uint8_t controllerEvent=CONTR_NOEVENT;
-uint8_t encoderPos=0;
-uint8_t clickButton;
-int clickcount=0;
-int ticPot=0;       //Used for cont of single step of rotary encoder 
-int PotDivider=POTDIVIDER;   //Divider for ticPot for best regulation of sensitivity
-int Pot=0;
-int But;
-char ActEnc, OldEnc;
-
-
-// Interrupts from the MCP will be handled by this PIN on Arduino
-byte MCPIntPin = MCPINTPIN;
-// ... and this intterrupt vector
-byte arduinoMCPInterrupt = 1;
-
-// Interrupts from zero crossing circuit
-byte ZeroCIntPin = ZEROCINTPIN;
-// ... and this intterrupt vector
-byte arduinoZeroCInterrupt = 0;
-
+//Interrupts vars
+byte MCPIntPin = MCPINTPIN;	// Interrupts from the MCP will be handled by this PIN on Arduino
+byte arduinoMCPInterrupt = 1;	// ... and this interrupt vector
+byte ZeroCIntPin = ZEROCINTPIN; // Interrupts from zero crossing circuit
+byte arduinoZeroCInterrupt = 0; // ... and this interrupt vector
 volatile boolean awakenByMCPInterrupt   = false;  
 unsigned long lastMillisInterrupt = 0;
+uint8_t phaseCounter=0; 	//increment at every phase zero crossing at 100 (=1 sec)  increment opTime
 
-uint8_t LcdPot, HLcdPot;
-unsigned long LcdUpd;            //Last time lcd was updated for real time menu refresh es Home 
-boolean PIDUpd;
-boolean ModPar, MModPar, GetVal;
+//Timing vars
+unsigned long LcdUpd;           //Last time lcd was updated for real time menu refresh es Home 
+long relayStartTime=0;		//Relay time start: wait some time after start button press
+int AutoOffTime;		//Time for auto shutdown in seconds
+int opTime=0;			//operation Timer normally equal to millis(), used for temperature welding curve time calculation, displayed in home menu
+long last_PIDTime=0;		//Last time PID was calculated
 
+//PID vars
+char KI, KD, KP;		//Used by PID
+bool DoPid=0;			//Set to true if it's time to recalculate PID
+signed int  SumE, Int_Res, Dev_Res, Err, Err1; //Used by PID
+signed long Pid_Res;		//Used by PID
+uint16_t TCNT_timer=0;		//Calculate PID controller pulse width, used by interrupt
+
+//Temp, Air, status vars
+int ActTemp=0;			//Actual gun air temp
+int TempGunApp=0;		//Target temperature for PID temporary variable when weld cycle is not active
+int TempGun=0;			//Target temperature for PID, at work the air flow with this temp from gun
+int AirFlowApp=0;		//Temporary variable for air flow when weld cycle is not active
+int AirFlow=0;
 int MaxT = 0;
 int MinT = 30;
-int AutoOffTime;		//Time for auto shutdown in seconds
+boolean StartStop, PrevStartStop;
+uint8_t WeldStatus;
 
-char KI, KD, KP;
+int X=0;
 
-//Pid Var
-bool DoPid=0;			//Set to true if it's time to recalculate PID
-signed int  SumE, Int_Res, Dev_Res, Err, Err1;
-signed long Pid_Res;
-
-uint16_t TCNT_timer=0;
-boolean state;
-
+//Menu and display vars
 #define MENU_HOME 0
 #define MENU_TITLES 12 
-boolean initPar=false;
-
-int ActTemp=0;		//Actual gun air temp
-int TempGunApp=0;	//Target temperature for PID temporary variable when weld cycle is not active
-int TempGun=0;		//Target temperature for PID, at work the air flow with this temp from gun
-int AirFlowApp=0;	//Temporary variable for air flow when weld cycle is not active
-int AirFlow=0;
-
 int menu=MENU_HOME;
 int menudec,menuunit;
 int menuold=-1;
-int ModVal;
-
-int opTime=0;		//operation Timer normally equal to millis(), used for temperature welding curve time calculation, displayed in home menu
-uint8_t phaseCounter=0; //increment at every phase zero crossing at 100 (=1 sec)  increment opTime
-int nextEventTime=0;
-int actTime=0;
-uint8_t curveInd=0;     //operation index for tempCurve array
-boolean weldCycle=0;    //indicate if weld cycle temp is active
-
-long last_PIDTime=0;
-
-boolean StartStop, PrevStartStop;
-uint8_t WeldStatus;
-long relayStartTime=0;
-
-int X=0;
 /*
    First char convention for menu voice handling:
    x=empty voice -> skip next level or (for last) home
@@ -179,6 +149,7 @@ const char *menuvoice[MENU_TITLES][12]=
 	{"x"			,"mAutoOffTime"	,"mPPPreset"	,"mSure?"},									//100..
 	{"x"			,"hSaveAutoOff"	,"hSavePPPreset","hSaveDefault"},								//110..
 };
+char menuDisplay[16] = "";
 
 /*
 
@@ -196,6 +167,8 @@ const char *menuvoice[MENU_TITLES][12]=
    const uint8_t tempCurve[]={target,time,target,time};    
  */	
 
+uint8_t curveInd=0;     	//operation index for tempCurve array
+boolean weldCycle=0;    	//indicate if weld cycle temp is active
 const uint8_t tempCurve[]={     //target temp   //time to mantain temp
 	150,			6,		//prehot
 	155,			4,		//weld temp
@@ -204,7 +177,6 @@ const uint8_t tempCurve[]={     //target temp   //time to mantain temp
 };    
 
 
-char menuDisplay[16] = "";
 
 
 void handleMCPInterrupt() {
