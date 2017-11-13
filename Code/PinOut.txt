@@ -3,27 +3,27 @@
 3	RESET
 4	GND
 5	D2*		Fase 0
-6	D3		Potenz Dig A
-7	D4		Potenz Dig B
-8	D5*		
-9	D6* 		LCD Contarsto 
-10	D7		Triac
+6	D3		MCP_INT
+7	D4		
+8	D5*		MAX6675_SO
+9	D6* 	MAX6675_CS
+10	D7		MAX6675_CLK
 11	D8		Relè sic 220V
-12	D9* 		Mosfet "Fan"
+12	D9* 	Triac
 13	D10*		
-14	D11* 		MAX6675_DO
-15	D12  		MAX6675_CLK
-16	D13		MAX6675_CS
-17	3V3
+14	D11* 	Mosfet "Fan"
+15	D12  	
+16	D13		LedR
+17	3V3		
 18	AREF
-19	A7		LedV
-20	A6		LedR
+19	A7		
+20	A6		
 21	A5		LCD I2c
 22	A4		LCD I2c
 23	A3		
-24	A2		Potenz Dig Click 
-25	A1		P Stop
-26	A0		P Start
+24	A2		
+25	A1		
+26	A0		
 27	+5V
 28	RESET
 29	GND
