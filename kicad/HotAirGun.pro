@@ -1,4 +1,4 @@
-update=mar 31 ott 2017 23:05:42 CET
+update=lun 13 nov 2017 22:02:40 CET
 version=1
 last_client=kicad
 [general]
@@ -74,3 +74,4 @@ LibName30=valves
 LibName31=lib/max6675/max6675
 LibName32=lib/Displays/lcd16x2
 LibName33=switches
+LibName34=relays

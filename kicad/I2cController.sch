@@ -32,6 +32,7 @@ LIBS:valves
 LIBS:max6675
 LIBS:lcd16x2
 LIBS:switches
+LIBS:relays
 LIBS:HotAirGun-cache
 EELAYER 25 0
 EELAYER END
