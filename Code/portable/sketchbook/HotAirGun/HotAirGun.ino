@@ -742,11 +742,11 @@ void loop() {
 			Serial.print("\t");
 			Serial.print(Pid_Res);
 			Serial.print("\t");
-			Serial.println(StartStop);
+			Serial.print(StartStop);
 			Serial.print("\t");
 			Serial.print(KP,DEC);
 			Serial.print("\t");
-			Serial.println(KI,DEC);
+			Serial.print(KI,DEC);
 			Serial.print("\t");
 			Serial.println(KD,DEC);
 		}
