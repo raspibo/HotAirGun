@@ -15,15 +15,15 @@
 #define		D_AutoOffTime	3600
 
 #define		LCD_Update	100
-#define		PID_Update	100
+//#define   PID_Update  100
 
-#define 	PidTime   	100      //Period 1 sec
+#define   PidTime     40      
 #define 	TStop     	25
-#define 	Kp           	1
-#define 	Ki           	5
-#define 	Kd           	0
-#define 	SumE_Min     	-1200
-#define 	SumE_Max     	1200
+//#define   Kp            1
+//#define   Ki            5
+//#define   Kd            0
+#define   SumE_Min      -1000
+#define   SumE_Max      1000
 #define 	PidOutMin    	0
 #define 	PidOutMax    	1200
 
@@ -79,7 +79,7 @@ boolean initPar=false;		//Used by menus
 #define SCK		7	//MAX6675 signal clock
 #define TILTSENSOR	8	//Tilt sensor for gun
 #define GATE		9	//TRIAC gate
-#define EMERG_RELAY	10	//Emergency and power relay
+#define EMERG_RELAY 8 //Emergency and power relay
 #define P_FAN_PWM 	11	//Define pin D10 for pwm signal for gun
 #define _STARTSTOP	12	//Pin used for activation of hot air production (also used for magnetic sensor on gun)
 #define DEBUGLED     	13	//Led used for debug purpose
@@ -238,7 +238,6 @@ void handleMCPInterrupt() {
 			break;
 		default:
 			if (millis() > lastMillisInterrupt+10) {
-				//Serial.println(intPin);
 				controllerEvent=CONTR_BTN;
 #ifndef STARTSTOP
 				if (intPin==4) {	//Use button as start welding controller
@@ -272,7 +271,7 @@ void ZeroCCallBack() {			//High priority interrupt, only minimal operation and n
 	detachInterrupt(arduinoZeroCInterrupt);
 	sbi(PINB,5);           		//Defined by macro on top for fast toggle pin D13 = DEBUGLED
 	phaseCounter++;
-	if (phaseCounter>=100) {
+  if (phaseCounter>=PidTime ) {
 		opTime--;
 		phaseCounter=0;
 		DoPid=1;
@@ -407,7 +406,7 @@ void PID (void)    //Controllo PID
 	if(SumE < SumE_Min)SumE = SumE_Min;
 
 	//Int_Res = SumE / 10;                 // Ki*SumE/(Kp*Fs*X) where X is an unknown scaling factor
-	Int_Res = SumE * Ki;                   // combination of scaling factor and Kp
+  Int_Res = SumE * KI;                   // combination of scaling factor and Kp
 	//Int_Res = Int_Res ;// / 16;
 
 	// Calculate the derivative term
@@ -415,7 +414,7 @@ void PID (void)    //Controllo PID
 	/*if(Dev_Res > 120)Dev_Res = 120;
 	  if(Dev_Res < -120)Dev_Res = -120;*/
 
-	Dev_Res =   Kd*(Err - Err1);               // Derivative Kd(en0-en3)/(Kp*X*3*Ts)
+  Dev_Res =   KD*(Err - Err1);               // Derivative Kd(en0-en3)/(Kp*X*3*Ts)
 	//Dev_Res = Dev_Res /2;
 
 	if(Dev_Res > 120)Dev_Res = 120;
@@ -424,7 +423,7 @@ void PID (void)    //Controllo PID
 
 	// C(n) = K(E(n) + (Ts/Ti)SumE + (Td/Ts)[E(n) - E(n-1)])
 	Pid_Res = Err + Int_Res + Dev_Res;        // Sum the terms
-	Pid_Res = Pid_Res * Kp>>1;                // multiply by Kp then scale
+  Pid_Res = Pid_Res * KP>>1;                // multiply by Kp then scale
 	if(Pid_Res> PidOutMax)  Pid_Res=PidOutMax;
 	if(Pid_Res< PidOutMin)  Pid_Res=PidOutMin;
 	TCNT_timer=63060+Pid_Res;
@@ -649,9 +648,14 @@ void setup() {
 	MinT = EEPROM.read(M_MinT);
 	MaxT = EEPROM.read(M_MaxT1);
 	MaxT = (MaxT << 8) + EEPROM.read(M_MaxT);
-	AutoOffTime = EEPROM.read(M_AutoOffTime1);
-	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
-	AutoOffTime = 0 - AutoOffTime;	//Convert to negative
+//  AutoOffTime = EEPROM.read(M_AutoOffTime1);
+//  AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
+//  AutoOffTime * = -1;  //Convert to negative
+  AutoOffTime=-30000;
+  Serial.print("AOffTime");
+  Serial.println(AutoOffTime);
+  
+  
 	if (TempGunApp > D_MaxT) TempGunApp = D_MaxT;
 	if (AirFlowApp < D_AirFlowApp) AirFlowApp = D_AirFlowApp;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -720,13 +724,13 @@ void setup() {
 
 void loop() {
 	//Error and emergengy handling function
-	if (checkerror()==1) {
-		TempGun=0;
-		AirFlow=100;
-		digitalWrite(EMERG_RELAY,LOW);		//Disable power to gun
-		Serial.println("Shutdown after error!");
-		exit(0);
-	}
+//  if (checkerror()==1) {
+//    TempGun=0;
+//    AirFlow=100;
+//    digitalWrite(EMERG_RELAY,LOW);    //Disable power to gun
+//    Serial.println("Shutdown after error!");
+//    exit(0);
+//  }
 	if (DoPid) {					//Check if PID recalc is needed(recalc after 1 second) 
 
 		PID();					
@@ -739,6 +743,12 @@ void loop() {
 			Serial.print(Pid_Res);
 			Serial.print("\t");
 			Serial.println(StartStop);
+			Serial.print("\t");
+			Serial.print(KP,DEC);
+			Serial.print("\t");
+			Serial.println(KI,DEC);
+			Serial.print("\t");
+			Serial.println(KD,DEC);
 		}
 
 	} else {
