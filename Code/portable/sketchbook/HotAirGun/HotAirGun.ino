@@ -40,6 +40,11 @@
 #define		M_AutoOffTime   11	
 #define		M_AutoOffTime1  12	
 
+
+//Enable functions to check empty eeporm and write default values. Useful for new micros.
+#define CHECKEMPTYEEPROM	true
+#define SETDEFAULTEEPROM	true
+
 //I2cController vars definition
 I2cControllerLib contr(0x20);	// Connect via i2c, default address #0 (A0-A2 not jumpered)
 #define EN_A 1 			// Encored scroll A0
@@ -134,7 +139,7 @@ int menuold=-1;
    n=nothing used for home and menu titles used as spacer
    a=apply and go to home
  */
-const char *menuvoice[MENU_TITLES][12]=
+const char *menuvoice[MENU_TITLES][7]=
 {
 	{"nHome"},													//00
 	{"nSetFast"  		,"vAirTemp"	,"vAirFlow"	,"hExit"},							//10,11,12..
@@ -149,7 +154,6 @@ const char *menuvoice[MENU_TITLES][12]=
 	{"x"			,"mAutoOffTime"	,"mPPPreset"	,"mSure?"},									//100..
 	{"x"			,"hSaveAutoOff"	,"hSavePPPreset","hSaveDefault"},								//110..
 };
-char menuDisplay[16] = "";
 
 /*
 
@@ -176,15 +180,16 @@ const uint8_t tempCurve[]={     //target temp   //time to mantain temp
 	180	                                //temperature after welding
 };    
 
-
+//Serial vars
+String inputString = "";         // a String to hold incoming data
+boolean stringComplete = false;  // whether the string is complete
+String SerialAction = "";		 // strore selected command by key pressing
 
 
 void handleMCPInterrupt() {
 	detachInterrupt(arduinoMCPInterrupt);
-	//	if (millis()>lastMillisInterrupt+5) {
 	//A    |¯¯|__|¯¯|__|¯
 	//B  - __|¯¯|__|¯¯|__  +
-	// Nel canale A pin D3 condensatore ceramico 103K 10nF
 	uint8_t ActEnc=0;
 	uint8_t intPin=contr.getLastInterruptPin();
 	uint8_t valPin=contr.getLastInterruptPinValue();
@@ -233,7 +238,6 @@ void handleMCPInterrupt() {
 			break;
 		default:
 			if (millis() > lastMillisInterrupt+10) {
-				//Serial.print("Button: A");
 				//Serial.println(intPin);
 				controllerEvent=CONTR_BTN;
 #ifndef STARTSTOP
@@ -247,9 +251,6 @@ void handleMCPInterrupt() {
 			}
 			break;
 	}
-
-	//	}
-
 
 	lastMillisInterrupt=millis();
 	cleanMCPInterrupts();
@@ -353,6 +354,9 @@ void saveParMenu() {
 		case 64: 	MinT 	= ModVal;  	EEPROM.write(M_MinT, MinT);		break;
 		case 65: 	MaxT 	= ModVal;   	EEPROM.write(M_MaxT, MaxT);   				EEPROM.write(M_MaxT1, (MaxT >> 8));     		break;
 		case 111: 	AutoOffTime= ModVal;   	EEPROM.write(M_AutoOffTime, AutoOffTime);   		EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8));	break;  //Save long value  to two eeprom memory bytes.
+#ifdef SETDEFAULTEEPROM
+		case 113: 	setdefaulteepromvalues();	break;  //Save long value  to two eeprom memory bytes.
+#endif
 	}  
 	initPar=false;
 }
@@ -477,6 +481,7 @@ signed int TempC(){
 	return v*0.25;
 }
 
+#ifdef CHECKEMPTYEEPROM
 bool checkemptyeeprom() {
 	int x=0;
 	int param=0;
@@ -484,12 +489,36 @@ bool checkemptyeeprom() {
 	for (x=0; x < EEPROM.length(); x++) {
 		param=EEPROM.read(x);
 		//Serial.println(param);
-		if (param!=0) {
+		if (param!=255) {
 			retval=1;
 		}
 	}
 	return retval;
 }
+#define SETDAFULTVALUES
+#endif
+
+#ifdef SETDEFAULTEEPROM
+void setdefaulteepromvalues() {
+		ModVal=D_TempGunApp;
+		menu=31;saveParMenu();
+		ModVal=D_AirFlowApp;
+		menu=32;saveParMenu();
+		ModVal=KP;	
+		menu=61;saveParMenu();
+		ModVal=KI;	
+		menu=62;saveParMenu();
+		ModVal=KD;
+		menu=63;saveParMenu();
+		ModVal=D_MinT;
+		menu=64;saveParMenu();
+		ModVal=D_MaxT;
+		menu=65;saveParMenu();
+		ModVal=D_AutoOffTime;
+		menu=111;saveParMenu();	
+		Serial.println("Saving default values");
+}
+#endif
 
 bool checkerror() {
 	if (ActTemp==-200) {
@@ -560,8 +589,34 @@ void startstop() {						//Handler for start/stop button
 	}
 }
 
+void serialEvent() {
+	while (Serial.available()) {
+		// get the new byte:
+		char inChar = (char)Serial.read();
+		// if the incoming character is a newline, set a flag so the main loop can
+		// do something about it:
+		if (inChar == '\r') {
+			stringComplete = true;
+		} else {
+			// add it to the inputString:
+			inputString += inChar;
+			Serial.print(inChar);
+		}
+	}
+}
+
+void printSerialMenu() {
+	Serial.println("Enter one of following letters and press enter:");
+	Serial.println("l => log temp and PID");
+	Serial.println("t => print weld curve. Even lines are temps, odd seconds to wait");
+	Serial.println("p:prehotTemp,Secs,Temp,Secs,Temp,Secs,Temp => program weld curve. es: p-160,60,270,20,254,10,160");
+	Serial.println("s => stop prev command");
+	Serial.println("h => shutdown");
+}
+
 void setup() {
 	Serial.begin(2000000);
+	inputString.reserve(40);
 	//Serial.print("Startup");
 	contr.setMCPType(LTI_TYPE_MCP23017); 
 	// set up the LCD's number of rows and columns:
@@ -573,25 +628,14 @@ void setup() {
 	contr.print("Hot Air Gun");
 	contr.setCursor(0,1);
 	contr.print("Wait....");
+#ifdef CHECKEMPTYEEPROM
 	if (checkemptyeeprom()==0) {
-		ModVal=D_TempGunApp;
-		menu=31;saveParMenu();
-		ModVal=D_AirFlowApp;
-		menu=32;saveParMenu();
-		ModVal=KP;	
-		menu=61;saveParMenu();
-		ModVal=KI;	
-		menu=62;saveParMenu();
-		ModVal=KD;
-		menu=63;saveParMenu();
-		ModVal=D_MinT;
-		menu=64;saveParMenu();
-		ModVal=D_MaxT;
-		menu=65;saveParMenu();
-		ModVal=D_AutoOffTime;
-		menu=111;saveParMenu();	
-		Serial.println("EEPROM empty! Saving default values");
+		Serial.println("Saving default values");
+#ifdef SETDEFAULTEEPROM
+		setdefaulteepromvalues();
+#endif
 	};
+#endif
 	TempGunApp = EEPROM.read(M_Temp1);
 	TempGunApp = (TempGunApp << 8) + EEPROM.read(M_Temp);
 	TempGun=0;
@@ -607,7 +651,7 @@ void setup() {
 	MaxT = (MaxT << 8) + EEPROM.read(M_MaxT);
 	AutoOffTime = EEPROM.read(M_AutoOffTime1);
 	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
-	AutoOffTime *= -1;	//Convert to negative
+	AutoOffTime = 0 - AutoOffTime;	//Convert to negative
 	if (TempGunApp > D_MaxT) TempGunApp = D_MaxT;
 	if (AirFlowApp < D_AirFlowApp) AirFlowApp = D_AirFlowApp;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -671,6 +715,7 @@ void setup() {
 	//CS22:0: Clock Select -> CS22 Clock quartz/64 by prescaler. Required by 8 bit counter.
 	TCCR2B = _BV(CS22);
 
+	printSerialMenu();
 }
 
 void loop() {
@@ -686,13 +731,15 @@ void loop() {
 
 		PID();					
 		DoPid=0;
-		Serial.print(ActTemp);
-		Serial.print("\t");
-		Serial.print(TempGun);
-		Serial.print("\t");
-		Serial.print(Pid_Res);
-		Serial.print("\t");
-		Serial.println(StartStop);
+		if (SerialAction=="l") {
+			Serial.print(ActTemp);
+			Serial.print("\t");
+			Serial.print(TempGun);
+			Serial.print("\t");
+			Serial.print(Pid_Res);
+			Serial.print("\t");
+			Serial.println(StartStop);
+		}
 
 	} else {
 		startstop();
@@ -780,10 +827,40 @@ void loop() {
 				if (ActTemp<=40) {
 					AirFlow=0;    //when air on gun is lower than 40 degrees cut off pwn on fan
 					OCR2A =0;
-					Serial.println("Fan stop");
+					Serial.println("Shutdown");
 					delay(500);
 					exit(0);
 				}
+			}
+
+			if (stringComplete == true) {
+				switch (inputString[0]) {
+					case '?' :
+						printSerialMenu();
+						break;
+					case 'l' :
+						SerialAction="l";
+						break;
+					case 'p' :
+						SerialAction="p";
+						break;
+					case 't' :
+						SerialAction="";
+						for (int tmpcnt = 0; tmpcnt <= 6; tmpcnt++){
+                                                                Serial.print(tmpcnt);
+                                                                Serial.print(": ");
+                                                                Serial.println(tempCurve[tmpcnt]);
+                                                }
+						break;
+					case 'h' :
+						opTime=AutoOffTime;
+						break;
+					case 's' :
+						SerialAction="";
+						break;
+				}	
+				inputString = "";
+				stringComplete = false;
 			}
 		}
 	}
