@@ -17,7 +17,7 @@
 #define		LCD_Update	100
 //#define   PID_Update  100
 
-#define   PidTime     40      
+#define   PidTime     40      //Period 1 sec
 #define 	TStop     	25
 //#define   Kp            1
 //#define   Ki            5
@@ -238,6 +238,7 @@ void handleMCPInterrupt() {
 			break;
 		default:
 			if (millis() > lastMillisInterrupt+10) {
+				//Serial.println(intPin);
 				controllerEvent=CONTR_BTN;
 #ifndef STARTSTOP
 				if (intPin==4) {	//Use button as start welding controller
@@ -648,14 +649,9 @@ void setup() {
 	MinT = EEPROM.read(M_MinT);
 	MaxT = EEPROM.read(M_MaxT1);
 	MaxT = (MaxT << 8) + EEPROM.read(M_MaxT);
-//  AutoOffTime = EEPROM.read(M_AutoOffTime1);
-//  AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
-//  AutoOffTime * = -1;  //Convert to negative
-  AutoOffTime=-30000;
-  Serial.print("AOffTime");
-  Serial.println(AutoOffTime);
-  
-  
+	AutoOffTime = EEPROM.read(M_AutoOffTime1);
+	AutoOffTime = (AutoOffTime << 8) + EEPROM.read(M_AutoOffTime);
+	AutoOffTime = 0 - AutoOffTime;	//Convert to negative
 	if (TempGunApp > D_MaxT) TempGunApp = D_MaxT;
 	if (AirFlowApp < D_AirFlowApp) AirFlowApp = D_AirFlowApp;
 	if (KP < D_Min_Pid) KP = D_Min_Pid;
@@ -742,13 +738,7 @@ void loop() {
 			Serial.print("\t");
 			Serial.print(Pid_Res);
 			Serial.print("\t");
-			Serial.print(StartStop);
-			Serial.print("\t");
-			Serial.print(KP,DEC);
-			Serial.print("\t");
-			Serial.print(KI,DEC);
-			Serial.print("\t");
-			Serial.println(KD,DEC);
+			Serial.println(StartStop);
 		}
 
 	} else {
