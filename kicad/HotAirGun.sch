@@ -1,38 +1,67 @@
 EESchema Schematic File Version 2
 LIBS:HotAirGun-rescue
-LIBS:power
-LIBS:device
-LIBS:transistors
-LIBS:conn
-LIBS:linear
-LIBS:regul
 LIBS:74xx
-LIBS:cmos4000
+LIBS:ac-dc
 LIBS:adc-dac
-LIBS:memory
-LIBS:xilinx
-LIBS:microcontrollers
-LIBS:dsp
-LIBS:microchip
+LIBS:Altera
+LIBS:analog_devices
 LIBS:analog_switches
-LIBS:motorola
-LIBS:texas
-LIBS:intel
-LIBS:audio
-LIBS:interface
-LIBS:digital-audio
-LIBS:philips
-LIBS:display
-LIBS:cypress
-LIBS:siliconi
-LIBS:opto
 LIBS:atmel
+LIBS:audio
+LIBS:bbd
+LIBS:brooktre
+LIBS:cmos4000
+LIBS:conn
 LIBS:contrib
-LIBS:valves
-LIBS:max6675
-LIBS:lcd16x2
-LIBS:switches
+LIBS:cypress
+LIBS:dc-dc
+LIBS:device
+LIBS:digital-audio
+LIBS:dsp
+LIBS:elec-unifil
+LIBS:ESD_Protection
+LIBS:ftdi
+LIBS:gennum
+LIBS:hc11
+LIBS:intel
+LIBS:interface
+LIBS:ir
+LIBS:Lattice
+LIBS:linear
+LIBS:maxim
+LIBS:memory
+LIBS:microchip
+LIBS:microcontrollers
+LIBS:motor_drivers
+LIBS:motorola
+LIBS:nordicsemi
+LIBS:onsemi
+LIBS:opto
+LIBS:Oscillators
+LIBS:philips
+LIBS:power
+LIBS:Power_Management
+LIBS:powerint
+LIBS:pspice
+LIBS:references
+LIBS:regul
 LIBS:relays
+LIBS:rfcom
+LIBS:sensors
+LIBS:silabs
+LIBS:siliconi
+LIBS:supertex
+LIBS:switches
+LIBS:texas
+LIBS:transistors
+LIBS:valves
+LIBS:video
+LIBS:wiznet
+LIBS:Worldsemi
+LIBS:Xicor
+LIBS:xilinx
+LIBS:zetex
+LIBS:Zilog
 LIBS:HotAirGun-cache
 EELAYER 25 0
 EELAYER END
@@ -41,7 +70,7 @@ encoding utf-8
 Sheet 1 4
 Title "HotAirGun"
 Date "29 03 2017"
-Rev ""
+Rev "V2.0"
 Comp "Raspibo"
 Comment1 "You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0"
 Comment2 "Licensed under the Apache License, Version 2.0 (the \"License\")"
@@ -49,66 +78,16 @@ Comment3 "Copyright 2017-2018 sandroxGH infomsystemsrl@gmail.com, RaspiBO info@r
 Comment4 "http://www.raspibo.org/wiki/index.php?title=HotAirGun"
 $EndDescr
 $Sheet
-S 5855 2430 3080 1130
+S 5847 2030 3153 1870
 U 59BAEC52
 F0 "I2cController" 60
 F1 "I2cController.sch" 60
 $EndSheet
 $Sheet
-S 2730 4350 1560 805 
+S 2750 4346 1560 805 
 U 59BB1A8A
 F0 "AC_control" 60
 F1 "AC_control.sch" 60
-$EndSheet
-$Comp
-L PWR_FLAG #FLG01
-U 1 1 59BC2B33
-P 5735 7290
-F 0 "#FLG01" H 5735 7365 50  0001 C CNN
-F 1 "PWR_FLAG" H 5735 7463 50  0000 C CNN
-F 2 "" H 5735 7290 50  0001 C CNN
-F 3 "" H 5735 7290 50  0001 C CNN
-	1    5735 7290
-	-1   0    0    1   
-$EndComp
-$Comp
-L VCC #PWR02
-U 1 1 59BC2B39
-P 5735 7215
-F 0 "#PWR02" H 5735 7065 50  0001 C CNN
-F 1 "VCC" H 5752 7388 50  0000 C CNN
-F 2 "" H 5735 7215 50  0001 C CNN
-F 3 "" H 5735 7215 50  0001 C CNN
-	1    5735 7215
-	1    0    0    -1  
-$EndComp
-$Comp
-L GND #PWR03
-U 1 1 59BC2B40
-P 6285 7315
-F 0 "#PWR03" H 6285 7065 50  0001 C CNN
-F 1 "GND" H 6290 7142 50  0000 C CNN
-F 2 "" H 6285 7315 50  0001 C CNN
-F 3 "" H 6285 7315 50  0001 C CNN
-	1    6285 7315
-	1    0    0    -1  
-$EndComp
-$Comp
-L PWR_FLAG #FLG04
-U 1 1 59BC2B47
-P 6285 7215
-F 0 "#FLG04" H 6285 7290 50  0001 C CNN
-F 1 "PWR_FLAG" H 6285 7389 50  0000 C CNN
-F 2 "" H 6285 7215 50  0001 C CNN
-F 3 "" H 6285 7215 50  0001 C CNN
-	1    6285 7215
-	1    0    0    -1  
-$EndComp
-$Sheet
-S 2965 2440 1085 1095
-U 59BC38F0
-F0 "Microcontroller" 60
-F1 "Microcontroller.sch" 60
 $EndSheet
 $Bitmap
 Pos 3490 2975
@@ -7293,7 +7272,7 @@ $EndBitmap
 Text Notes 4020 1735 0    394  ~ 79
 Hot Air Gun
 $Bitmap
-Pos 7730 4490
+Pos 7970 5060
 Scale 1,000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 02 80 00 00 01 E2 08 02 00 00 00 F7 7B EA 
@@ -13837,14 +13816,16 @@ E9 8B 05 0B 60 66 6E B7 DB 29 25 D6 42 D0 4A 29 A5 7E 03 FB 7D 06 2F D0 72 AC 88
 78 53 17 AE 5A 29 D5 23 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Wire Wire Line
-	5735 7290 5735 7215
-Wire Wire Line
-	6285 7315 6285 7215
 Wire Bus Line
 	4050 3015 5855 3015
 Wire Bus Line
 	3450 3540 3450 4350
 Wire Bus Line
 	6905 5010 4290 5010
+$Sheet
+S 2950 2399 1050 1151
+U 59BC38F0
+F0 "Microcontroller" 60
+F1 "Microcontroller.sch" 60
+$EndSheet
 $EndSCHEMATC
