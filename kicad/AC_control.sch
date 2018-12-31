@@ -300,18 +300,7 @@ F 3 "" H 9525 5200 50  0001 C CNN
 	1    9550 5200
 	1    0    0    -1  
 $EndComp
-$Comp
-L Fuse F2
-U 1 1 5C0721B3
-P 9900 5100
-F 0 "F2" V 9980 5100 50  0000 C CNN
-F 1 "Fuse" V 9825 5100 50  0000 C CNN
-F 2 "Fuse_Holders_and_Fuses:Fuseholder5x20_horiz_open_Schurter_0031_8201" V 9830 5100 50  0001 C CNN
-F 3 "" H 9900 5100 50  0001 C CNN
-	1    9900 5100
-	0    1    1    0   
-$EndComp
-Text GLabel 10050 5100 2    60   Input ~ 0
+Text GLabel 9750 5100 2    60   Input ~ 0
 220F
 Text GLabel 9750 5300 2    60   Input ~ 0
 220N
@@ -339,7 +328,7 @@ L R R10
 U 1 1 5C073AAC
 P 3050 2000
 F 0 "R10" V 3130 2000 50  0000 C CNN
-F 1 "56k" V 3050 2000 50  0000 C CNN
+F 1 "100k" V 3050 2000 50  0000 C CNN
 F 2 "Resistors_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P15.24mm_Horizontal" V 2980 2000 50  0001 C CNN
 F 3 "" H 3050 2000 50  0001 C CNN
 	1    3050 2000

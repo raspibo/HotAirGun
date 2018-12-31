@@ -464,7 +464,7 @@ Text GLabel 3050 3150 3    60   Input ~ 0
 Gnd_P
 Text GLabel 2800 5800 3    60   Input ~ 0
 Gnd_P
-Text GLabel 4450 4000 3    60   Input ~ 0
+Text GLabel 4650 4000 3    60   Input ~ 0
 Gnd_P
 Text GLabel 4550 3400 1    60   Input ~ 0
 Gnd_P
@@ -523,12 +523,6 @@ F 3 "" H 3500 5350 50  0000 C CNN
 $EndComp
 Text GLabel 3500 5200 1    60   Input ~ 0
 Led
-Wire Wire Line
-	6900 3750 6900 3250
-Connection ~ 6900 3250
-Wire Wire Line
-	7100 3750 7100 3450
-Connection ~ 7100 3450
 Connection ~ 7950 2950
 Connection ~ 8100 3050
 $Comp
@@ -555,7 +549,13 @@ F 3 "" H 2950 2950 50  0000 C CNN
 $EndComp
 Connection ~ 3500 5800
 Wire Wire Line
-	4200 4400 4650 4400
+	4450 4400 4450 4000
 Wire Wire Line
-	4650 4400 4650 4000
+	4200 4400 4450 4400
+Wire Wire Line
+	6900 3450 6900 3750
+Connection ~ 6900 3450
+Wire Wire Line
+	7100 3750 7100 3250
+Connection ~ 7100 3250
 $EndSCHEMATC
