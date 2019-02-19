@@ -322,11 +322,11 @@ void ModParMenu() {
       case 13:  ModVal = KD;		break;
       case 14:  ModVal = MinT;		break;
       case 15:  ModVal = MaxT;		break;
-	  case 32:  ModVal = WeldCurv;	break;
-	  case 33:  ModVal = Target1;	break;
-	  case 34:  ModVal = Time1;		break;
-	  case 35:  ModVal = Target2;	break;
-	  case 36:  ModVal = Time2;		break;	  
+      case 32:  ModVal = WeldCurv;	break;
+      case 33:  ModVal = Target1;	break;
+      case 34:  ModVal = Time1;		break;
+      case 35:  ModVal = Target2;	break;
+      case 36:  ModVal = Time2;		break;	  
       case 41:  ModVal = AutoOffTime;	break;
     }
     InitPar = true;
@@ -341,19 +341,19 @@ void ModParMenu() {
     else ModVal = ModVal + Pot;
     Pot = 0;
     switch (Menu) {
-      case 1:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-      case 2:  if (ModVal < D_AirFlowMin) ModVal = D_AirFlowMin; 	if (ModVal > D_AirFlowMax) ModVal = D_AirFlowMax;	break;
-      case 11:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
-      case 12:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
-      case 13:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
-      case 14:  if (ModVal < 30) ModVal = 30 ;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-      case 15:  if (ModVal < 30) ModVal = 30 ;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	  case 32:  if (ModVal < 1) ModVal = 1;					if (ModVal  > 2) ModVal = 2;			break;
-	  case 33:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	  case 34:  if (ModVal < 1) ModVal = 1;				    if (ModVal  > 250) ModVal = 250;			break;
-	  case 35:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	  case 36:  if (ModVal < 1) ModVal = 1;				    if (ModVal  > 250) ModVal = 250;			break;
-      case 41:  if (ModVal < -32000) ModVal = -32000;			if (ModVal  > -100) ModVal = -100;			break;
+	case 1:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
+	case 2:  if (ModVal < D_AirFlowMin) ModVal = D_AirFlowMin; 	if (ModVal > D_AirFlowMax) ModVal = D_AirFlowMax;	break;
+	case 11:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
+	case 12:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
+	case 13:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
+	case 14:  if (ModVal < 30) ModVal = 30 ;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
+	case 15:  if (ModVal < 30) ModVal = 30 ;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
+	case 32:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 2) ModVal = 2;				break;
+	case 33:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
+	case 34:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 250) ModVal = 250;			break;
+	case 35:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
+	case 36:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 250) ModVal = 250;			break;
+	case 41:  if (ModVal < -32000) ModVal = -32000;			if (ModVal  > -100) ModVal = -100;			break;
     }
   }
   if (OldModVal != ModVal) {
