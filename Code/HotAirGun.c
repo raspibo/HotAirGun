@@ -1,5 +1,5 @@
 /******************************************************************************\
-* Hot Air Welder  Programs control											   *
+* Hot Air Welder  Programs control                                                                                           *
 * Mcu  Pic 16F876 to 4 Mhz,  pic run the PID control to control the air        *
 * temperature to the target also the PWM to control the fan speed / ari flow   *
 \******************************************************************************/
@@ -79,16 +79,16 @@ unsigned char Stop_Loop;
 char PidCount;
 //Menu & Parameter
 signed char Pot;
-char Act_PortB, Old_PortB;		//Dig Pot
+char Act_PortB, Old_PortB;                //Dig Pot
 unsigned char LcdRow,LcdRowOld,Loop;
-unsigned int TempGun,ActTemp; 	
-unsigned char AirFlow;			
+unsigned int TempGun,ActTemp;         
+unsigned char AirFlow;                        
 
 
 
 //Lcd Mess
 const char Logo[]=   "Msystem";
-const char Logo1[]=  "HotAirGun V1.0";
+const char Logo1[]=  "HotAirGun V1.1";
 const char StatMen[]="Act Temp  C";
 const char Menu1[]=  "TempGun   C";
 const char Menu2[]=  "AirFlow   %";
@@ -247,9 +247,9 @@ void main(){
    }
   }
   LedR=StartCicle;
-  if(StartCicle)PWM2_Set_Duty(154+AirFlow);
+  if(StartCicle)PWM2_Set_Duty(55+(AirFlow*2));
   if((StartCicle==0)&&(Time_Stop==1)){
-   PWM2_Set_Duty(254);
+   PWM2_Set_Duty(255);
    if (ActTemp<=TempStop){
      PWM2_Stop();
      PWMFan=0;
@@ -315,7 +315,7 @@ void Init(){
   ADCON1 = 6;               // Disable ADCON I/O general
 
                             //Prescaler TMR0 /32 are 312 pulse on 10 ms 250 + 62                            
-							//Enabel Interrupt on RB4-RB5 and TMR2
+                                                        //Enabel Interrupt on RB4-RB5 and TMR2
 
   INTCON      =0b11010000;  // D1=INTF: RB0/INT External Interrupt Flag bit
                             // D4=INTE: RB0/INT External Interrupt Enable bit
@@ -330,7 +330,7 @@ void Init(){
 
                     //Abilitazioni periferiche Hw
   //UART1_Init(19200);
-  PWM2_Init (15000);
+  PWM2_Init (300);
   Lcd_Init();
   Lcd_Cmd(_LCD_CURSOR_OFF);
   Lcd_Cmd(_LCD_CLEAR);
