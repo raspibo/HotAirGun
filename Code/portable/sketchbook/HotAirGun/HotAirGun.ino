@@ -6,9 +6,9 @@
 #include <EEPROM.h>
 
 //Debug
-#define SerilaPlot
+//#define SerilaPlot
 //#define F_Debug			//Uncomment to enable the "fast debug" use for event
-//#define S_Debug			//Uncomment to enable the schedule debug
+#define S_Debug			//Uncomment to enable the schedule debug
 #define TDebug		1000
 
 //Parameter definition
@@ -91,7 +91,7 @@ boolean EncClick, P1, P2, P3; //P4, P5;
 #define P_FAN_PWM	11  //Define pin D10 for pwm signal for gun
 #define _STARTSTOP	12  //Pin used for activation of hot air production (also used for magnetic sensor on gun)
 #define DEBUGLED	13  //Led used for debug purpose
-#define TILTSENSOR  A3	//Tilt sensor for gun
+#define HOLDER_SENS A3	//Tilt sensor for gun
 #define FOOT_SWITCH A4	// Switch to anable the welding curve
 
 
@@ -200,7 +200,7 @@ const uint8_t TempCurve[] = {   //target temp   //time to mantain temp
 void HandleMCPInterrupt() {
   detachInterrupt(ArdMCPInterrupt);
   //A    |¯¯|__|¯¯|__|¯
-  //B  - __|¯¯|__|¯¯|__  +
+  //B    ¯|__|¯¯|__|¯¯|__  +
   AwakenByMCPInterrupt = false;
   //uint8_t PortA = 0;
   PortA = contr.readRegister(MCP23017_GPIOA);
@@ -240,10 +240,13 @@ void HandleMCPInterrupt() {
     TicPot = 0;
   }
   if (!bitRead(IntA, 0) && bitRead(PortA, 0)) EncClick = 1;	else EncClick = 0;
-  if (!bitRead(IntA, 3) && bitRead(PortA, 3)) StartStop = 1; 	// P1 = 1;			else P1 = 0;
+  if (!bitRead(IntA, 3) && bitRead(PortA, 3)) StartStop = 1; 					//P1 = 1;			else P1 = 0;
   if (!bitRead(IntA, 5) && bitRead(PortA, 5)) {StartStop = 0; StartWlC = 0;}	//P2 = 1;			else P2 = 0;
-  if (!bitRead(IntA, 7) && bitRead(PortA, 7)) StartWlC = 1;			//else P3 = 0;
-  if (StartWlC) Pot = -1;
+  if (!bitRead(IntA, 7) && bitRead(PortA, 7)) StartWlC = 1;						//else P3 = 0;
+  if (StartWlC) {																//Disable panel navigation during the WLC cycle
+	  Pot = 0;
+	  EncClick = 0;
+  }
   //cleanMCPInterrupts();
   //we set callback for the arduino INT handler.
   OpTime = 0;
@@ -293,8 +296,9 @@ ISR(TIMER1_OVF_vect) { //timer1 overflow
 #if defined S_Debug
 void Debug() {
   GG = ~GG;
-  contr.WriteLed(Led4, GG);
-
+  contr.WriteLed(LED_4, GG);
+  Serial.println(Menu,DEC);
+  Serial.println(WeldCycle,DEC);
   //digitalWrite(LedV, !(digitalRead(LedV)));
   // Serial.println("Debug Programma");
   // Serial.print("MenuDec");
@@ -317,16 +321,16 @@ void ModParMenu() {
     switch (Menu) {
       case 1:   ModVal = TempGunApp;	break;
       case 2:   ModVal = AirFlowApp;	break;
-      case 11:  ModVal = KP;		break;
-      case 12:  ModVal = KI;		break;
-      case 13:  ModVal = KD;		break;
-      case 14:  ModVal = MinT;		break;
-      case 15:  ModVal = MaxT;		break;
-      case 32:  ModVal = WeldCurv;	break;
-      case 33:  ModVal = Target1;	break;
-      case 34:  ModVal = Time1;		break;
-      case 35:  ModVal = Target2;	break;
-      case 36:  ModVal = Time2;		break;	  
+      case 11:  ModVal = KP;			break;
+      case 12:  ModVal = KI;			break;
+      case 13:  ModVal = KD;			break;
+      case 14:  ModVal = MinT;			break;
+      case 15:  ModVal = MaxT;			break;
+      case 32:  ModVal = WeldCurv;		break;
+      case 33:  ModVal = Target1;		break;
+      case 34:  ModVal = Time1;			break;
+      case 35:  ModVal = Target2;		break;
+      case 36:  ModVal = Time2;			break;	  
       case 41:  ModVal = AutoOffTime;	break;
     }
     InitPar = true;
@@ -341,19 +345,19 @@ void ModParMenu() {
     else ModVal = ModVal + Pot;
     Pot = 0;
     switch (Menu) {
-	case 1:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	case 2:  if (ModVal < D_AirFlowMin) ModVal = D_AirFlowMin; 	if (ModVal > D_AirFlowMax) ModVal = D_AirFlowMax;	break;
-	case 11:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
-	case 12:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
-	case 13:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;		break;
-	case 14:  if (ModVal < 30) ModVal = 30 ;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	case 15:  if (ModVal < 30) ModVal = 30 ;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	case 32:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 2) ModVal = 2;				break;
-	case 33:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	case 34:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 250) ModVal = 250;			break;
-	case 35:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;			break;
-	case 36:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 250) ModVal = 250;			break;
-	case 41:  if (ModVal < -32000) ModVal = -32000;			if (ModVal  > -100) ModVal = -100;			break;
+	case 1:   if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;				break;
+	case 2:   if (ModVal < D_AirFlowMin) ModVal = D_AirFlowMin; 	if (ModVal > D_AirFlowMax) ModVal = D_AirFlowMax;		break;
+	case 11:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;			break;
+	case 12:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;			break;
+	case 13:  if (ModVal < D_Min_Pid)  ModVal = D_Min_Pid;		if (ModVal > D_Max_Pid) ModVal = D_Max_Pid;			break;
+	case 14:  if (ModVal < 30) ModVal = 30 ;			if (ModVal  > D_MaxT) ModVal = D_MaxT;				break;
+	case 15:  if (ModVal < 30) ModVal = 30 ;			if (ModVal  > D_MaxT) ModVal = D_MaxT;				break;
+	case 32:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 2) ModVal = 2;					break;
+	case 33:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;				break;
+	case 34:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 250) ModVal = 250;				break;
+	case 35:  if (ModVal < 30) ModVal = 30;				if (ModVal  > D_MaxT) ModVal = D_MaxT;				break;
+	case 36:  if (ModVal < 1) ModVal = 1;				if (ModVal  > 250) ModVal = 250;				break;
+	case 41:  if (ModVal < -32000) ModVal = -32000;			if (ModVal  > -100) ModVal = -100;				break;
     }
   }
   if (OldModVal != ModVal) {
@@ -368,31 +372,31 @@ void ModParMenu() {
 void SaveParMenu() {
   switch (Menu) {   //Third: save valid modified parameter on eeprom
     case 1:  TempGunApp = ModVal;  EEPROM.write(M_Temp, TempGunApp);     EEPROM.write(M_Temp1, (TempGunApp >> 8)); break;          //Save long value  to two eeprom memory bytes.
-    case 2:  AirFlowApp = AirFlow = ModVal;	EEPROM.write(M_AirFlow, AirFlowApp);			break;
+    case 2:  AirFlowApp = AirFlow = ModVal;	EEPROM.write(M_AirFlow, AirFlowApp);		break;
     case 11:  KP  = ModVal;		EEPROM.write(M_KP, KP);					break;
     case 12:  KI  = ModVal;		EEPROM.write(M_KI, KI);					break;
     case 13:  KD  = ModVal;		EEPROM.write(M_KD, KD);					break;
     case 14:  MinT  = ModVal;		EEPROM.write(M_MinT, MinT);				break;
-    case 15:  MaxT  = ModVal;		EEPROM.write(M_MaxT, MaxT); EEPROM.write(M_MaxT1, (MaxT >> 8));		break;
-    case 32:  WeldCurv = ModVal;  EEPROM.write(M_WeldCurv  , WeldCurv);	break;
-	case 33:  Target1 = ModVal;  EEPROM.write(M_Target1  , Target1);     EEPROM.write(M_Target11 , (Target1 >> 8)); break;
-	case 34:  Time1  = ModVal;		EEPROM.write(M_Time1, Time1);					break;
-	case 35:  Target2 = ModVal;  EEPROM.write(M_Target2  , Target2);     EEPROM.write(M_Target21 , (Target2 >> 8)); break;
-	case 36:  Time2  = ModVal;		EEPROM.write(M_Time2, Time2);					break;
-	case 41:  AutoOffTime = ModVal;	EEPROM.write(M_AutoOffTime, AutoOffTime); EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8)); AutoOffTime = 1 - AutoOffTime; break; //Save long value  to two eeprom memory bytes.
+    case 15:  MaxT  = ModVal;		EEPROM.write(M_MaxT, MaxT); EEPROM.write(M_MaxT1, (MaxT >> 8));		    break;
+    case 32:  WeldCurv = ModVal;  EEPROM.write(M_WeldCurv  , WeldCurv);				break;
+    case 33:  Target1 = ModVal;  EEPROM.write(M_Target1  , Target1);     EEPROM.write(M_Target11 , (Target1 >> 8)); break;
+    case 34:  Time1  = ModVal;		EEPROM.write(M_Time1, Time1);				break;
+    case 35:  Target2 = ModVal;  EEPROM.write(M_Target2  , Target2);     EEPROM.write(M_Target21 , (Target2 >> 8)); break;
+    case 36:  Time2  = ModVal;		EEPROM.write(M_Time2, Time2);				break;
+    case 41:  AutoOffTime = ModVal;	EEPROM.write(M_AutoOffTime, AutoOffTime); EEPROM.write(M_AutoOffTime1, (AutoOffTime >> 8)); AutoOffTime = 1 - AutoOffTime; break; //Save long value  to two eeprom memory bytes.
   }
   InitPar = false;
 }
 
 void SetMac() {
   switch (Menu) {
-    case 21:  TempGunApp = 300; AirFlowApp = 80;  break;         //Example for predefined temp and air flow for Sn
-    case 22:  TempGunApp = 120; AirFlowApp = 100; break;        //Example for predefined temp and air flow for a specific function heat shrink tubing
-    case 23:  TempGunApp = 270; AirFlowApp = 100; break;        //Example for predefined temp and air flow for a specific function weld LDPE
-    case 24:  TempGunApp = 300; AirFlowApp = 100; break;        //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
-    case 25:  TempGunApp = 350; AirFlowApp = 100; break;        //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
-    case 31:  WeldCycle = ~ WeldCycle;  break;        //Set WeldCycle var now at every loop weldCurve routine is checked to the end of temperature weld cycle
-    case 42:  DefVal(); break;
+    case 21:  TempGunApp = 300; AirFlowApp = 80;	break;         //Example for predefined temp and air flow for Sn
+    case 22:  TempGunApp = 120; AirFlowApp = 100;	break;        //Example for predefined temp and air flow for a specific function heat shrink tubing
+    case 23:  TempGunApp = 270; AirFlowApp = 100;	break;        //Example for predefined temp and air flow for a specific function weld LDPE
+    case 24:  TempGunApp = 300; AirFlowApp = 100; 	break;        //Example for predefined temp and air flow for a specific function weld PP,Hard PVC, Hard PE
+    case 25:  TempGunApp = 350; AirFlowApp = 100; 	break;        //Example for predefined temp and air flow for a specific function weld ABS, PC, Soft PVC
+    case 31:  WeldCycle = ~ WeldCycle;  		break;        //Set WeldCycle var now at every loop weldCurve routine is checked to the end of temperature weld cycle
+    case 42:  DefVal(); 				break;
   }
   InitPar = false;
 }
@@ -584,20 +588,23 @@ void startstop() {            //Handler for start/stop button
     }
     PrevStartStop = StartStop;
   }
-  if (WeldStatus == 1 && millis() > RelayStartTime && digitalRead(TILTSENSOR) == 0 ) {
-    digitalWrite(EMERG_RELAY, HIGH);        //Enable power to gun
-    TempGun = D_MinT;
-    RelayStartTime = 0;
-    AirFlow = AirFlowApp;
-  }
-  if (WeldStatus == 1 && millis() > RelayStartTime && digitalRead(TILTSENSOR) == 1) {
-    TempGun = TempGunApp;
-    AirFlow = AirFlowApp;
-  }
-  if (WeldStatus == 2 && ActTemp < 30) {
-
-    AirFlow = 0;
-  }
+  if(WeldStatus == 1 && millis() > RelayStartTime){
+	  if(!digitalRead(EMERG_RELAY)){
+		  digitalWrite(EMERG_RELAY, HIGH);
+		  delay(100);
+	    }
+	  if (!digitalRead(HOLDER_SENS)) {
+		  digitalWrite(EMERG_RELAY, HIGH);        //Enable power to gun
+		  TempGun = D_MinT;
+		  RelayStartTime = 0;
+		  AirFlow = AirFlowApp;
+	    }
+	  if (digitalRead(HOLDER_SENS)) {
+		  TempGun = TempGunApp;
+          AirFlow = AirFlowApp;
+	    }
+    }
+  if (WeldStatus == 2 && ActTemp < 30)AirFlow = 0;
 }
 
 void DefVal() {
@@ -630,16 +637,17 @@ void DefVal() {
 }
 
 void setup() {
-  //#if defined F_Debug || defined S_Debug
+  //#ifdef F_Debug || defined S_Debug || SerilaPlot
   Serial.begin(2000000);
-  //Serial.print("Startup");
-  //#endif					// set up the LCD's number of rows and columns:
+  Serial.print("Startup");
+ // #endif					// set up the LCD's number of rows and columns:
   contr.begin(16, 2);									// Print a message to the LCD.
   contr.clear();
   contr.setBacklight(HIGH);
   contr.setCursor(0, 0);
   contr.print("Hot Air Gun");
   contr.setCursor(0, 1);
+  contr.print(String(__DATE__));
   contr.print("Wait....");
   contr.buzz(500, 1000);
   if (checkemptyeeprom() == 0) {
@@ -698,14 +706,14 @@ void setup() {
   //interrupts();
   HandleMCPInterrupt();
   Menu = Menu_HOME;
-  pinMode(TILTSENSOR,   INPUT);
-  pinMode(GATE,     OUTPUT);
-  pinMode(EMERG_RELAY,  OUTPUT);
-  pinMode(P_FAN_PWM,  OUTPUT);
+  pinMode(HOLDER_SENS, INPUT_PULLUP);
+  pinMode(GATE, OUTPUT);
+  pinMode(EMERG_RELAY, OUTPUT);
+  pinMode(P_FAN_PWM, OUTPUT);
 #ifdef STARTSTOP
-  pinMode(STARTSTOP,  INPUT);
+  pinMode(STARTSTOP, INPUT);
 #endif
-  pinMode(DEBUGLED,   OUTPUT);
+  pinMode(DEBUGLED, OUTPUT);
   //define pin modes MAX6675
   pinMode(CS, OUTPUT);
   pinMode(SCK, OUTPUT);
@@ -737,7 +745,6 @@ void setup() {
   //CS22:0: Clock Select -> CS22 Clock quartz/64 by prescaler. Required by 8 bit counter.
   TCCR2B = _BV(CS22);
 
-  WeldCycle = 1;
 }
 
 void loop() {
@@ -801,20 +808,21 @@ void loop() {
     contr.print("A:");
     contr.print(AirFlow);
     contr.print("%");
-    contr.setCursor(15, 1);
+    contr.setCursor(12, 1);
     if (StartStop == 1) {
-      contr.print("W");
+	if (WeldCycle) contr.print("WelC");
+	else contr.print("Weld");
     }
     else {
-      contr.print("S");
+      contr.print("Stop");
     }
     contr.setCursor(0, 1);
     if (WeldCycle > 0) {
-      contr.print("t:");
+      contr.print("o:");
       contr.print(OpTime);
     }
     else {
-      contr.print("o:");
+      contr.print("t:");
       contr.print(OpTime);
     }
     LcdUpd = millis() + TimeLcd;
