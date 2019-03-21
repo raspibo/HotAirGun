@@ -8,33 +8,72 @@ LIBS:analog_devices
 LIBS:analog_switches
 LIBS:atmel
 LIBS:audio
+LIBS:Battery_Management
 LIBS:bbd
+LIBS:Bosch
 LIBS:brooktre
 LIBS:cmos4000
 LIBS:conn
+LIBS:Connector
 LIBS:contrib
 LIBS:cypress
 LIBS:dc-dc
+LIBS:Decawave
 LIBS:device
 LIBS:digital-audio
+LIBS:Diode
+LIBS:Display
+LIBS:driver_gate
 LIBS:dsp
+LIBS:DSP_Microchip_DSPIC33
 LIBS:elec-unifil
 LIBS:ESD_Protection
+LIBS:Espressif
+LIBS:FPGA_Actel
 LIBS:ftdi
 LIBS:gennum
+LIBS:Graphic
 LIBS:hc11
+LIBS:infineon
 LIBS:intel
 LIBS:interface
+LIBS:intersil
 LIBS:ir
 LIBS:Lattice
+LIBS:LED
+LIBS:LEM
 LIBS:linear
+LIBS:Logic_74xgxx
+LIBS:Logic_74xx
+LIBS:Logic_CMOS_4000
+LIBS:Logic_CMOS_IEEE
+LIBS:logic_programmable
+LIBS:Logic_TTL_IEEE
 LIBS:maxim
+LIBS:MCU_Microchip_PIC10
+LIBS:MCU_Microchip_PIC12
+LIBS:MCU_Microchip_PIC16
+LIBS:MCU_Microchip_PIC18
+LIBS:MCU_Microchip_PIC24
+LIBS:MCU_Microchip_PIC32
+LIBS:MCU_NXP_Kinetis
+LIBS:MCU_NXP_LPC
+LIBS:MCU_NXP_S08
+LIBS:MCU_Parallax
+LIBS:MCU_ST_STM8
+LIBS:MCU_ST_STM32
+LIBS:MCU_Texas_MSP430
+LIBS:Mechanical
 LIBS:memory
 LIBS:microchip
 LIBS:microcontrollers
+LIBS:modules
+LIBS:Motor
 LIBS:motor_drivers
 LIBS:motorola
+LIBS:Msystem
 LIBS:nordicsemi
+LIBS:nxp
 LIBS:onsemi
 LIBS:opto
 LIBS:Oscillators
@@ -45,15 +84,25 @@ LIBS:powerint
 LIBS:pspice
 LIBS:references
 LIBS:regul
+LIBS:Relay
 LIBS:relays
+LIBS:RF_Bluetooth
 LIBS:rfcom
+LIBS:RFSolutions
+LIBS:Sensor_Current
+LIBS:Sensor_Humidity
 LIBS:sensors
 LIBS:silabs
 LIBS:siliconi
 LIBS:supertex
+LIBS:Switch
 LIBS:switches
 LIBS:texas
+LIBS:Transformer
+LIBS:Transistor
 LIBS:transistors
+LIBS:triac_thyristor
+LIBS:Valve
 LIBS:valves
 LIBS:video
 LIBS:wiznet
@@ -62,6 +111,7 @@ LIBS:Xicor
 LIBS:xilinx
 LIBS:zetex
 LIBS:Zilog
+LIBS:arduino
 LIBS:HotAirGun-cache
 EELAYER 25 0
 EELAYER END
@@ -165,7 +215,7 @@ F 3 "" H 3100 4950 50  0000 C CNN
 $EndComp
 Wire Wire Line
 	3250 4950 3500 4950
-Text GLabel 5850 4500 2    60   Input ~ 0
+Text GLabel 6300 4500 2    60   Input ~ 0
 SAFE_REL
 Text GLabel 2800 4950 0    60   Input ~ 0
 TRIAC
@@ -185,67 +235,63 @@ Wire Wire Line
 Wire Wire Line
 	4800 3500 4800 3700
 Wire Wire Line
-	4800 3600 5250 3600
-Wire Wire Line
-	5250 3600 5250 3650
+	5700 3600 5700 3650
 Connection ~ 4800 3600
 $Comp
 L LED D5
 U 1 1 5A0A6CA5
-P 5250 3800
-F 0 "D5" H 5250 3900 50  0000 C CNN
-F 1 "LED" H 5250 3700 50  0000 C CNN
-F 2 "LEDs:LED-3MM" H 5250 3800 50  0001 C CNN
-F 3 "" H 5250 3800 50  0000 C CNN
-	1    5250 3800
+P 5700 3800
+F 0 "D5" H 5700 3900 50  0000 C CNN
+F 1 "LED" H 5700 3700 50  0000 C CNN
+F 2 "LEDs:LED-3MM" H 5700 3800 50  0001 C CNN
+F 3 "" H 5700 3800 50  0000 C CNN
+	1    5700 3800
 	0    -1   -1   0   
 $EndComp
 $Comp
 L R R13
 U 1 1 5A0A6E00
-P 5250 4100
-F 0 "R13" V 5330 4100 50  0000 C CNN
-F 1 "2K2" V 5150 4100 50  0000 C CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 5180 4100 50  0001 C CNN
-F 3 "" H 5250 4100 50  0000 C CNN
-	1    5250 4100
+P 5700 4100
+F 0 "R13" V 5780 4100 50  0000 C CNN
+F 1 "2K2" V 5600 4100 50  0000 C CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 5630 4100 50  0001 C CNN
+F 3 "" H 5700 4100 50  0000 C CNN
+	1    5700 4100
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5250 4250 5250 4300
-Wire Wire Line
-	5250 4300 4800 4300
+	5700 4250 5700 4300
 $Comp
-L Q_PNP_CBE Q2
+L Q_NPN_EBC Q2
 U 1 1 5A0A7278
-P 5350 4500
-F 0 "Q2" H 5550 4550 50  0000 L CNN
-F 1 "Q_PNP_CBE" H 5550 4450 50  0001 L CNN
-F 2 "TO_SOT_Packages_THT:TO-92_Rugged" H 5550 4600 50  0001 C CNN
-F 3 "" H 5350 4500 50  0000 C CNN
-	1    5350 4500
+P 5800 4500
+F 0 "Q2" H 6000 4550 50  0000 L CNN
+F 1 "Q_PNP_CBE" H 6000 4450 50  0001 L CNN
+F 2 "TO_SOT_Packages_THT:TO-92_Rugged" H 6000 4600 50  0001 C CNN
+F 3 "" H 5800 4500 50  0000 C CNN
+	1    5800 4500
 	-1   0    0    1   
 $EndComp
 $Comp
 L R R14
 U 1 1 5A0A72F3
-P 5700 4500
-F 0 "R14" V 5780 4500 50  0000 C CNN
-F 1 "470R" V 5600 4500 50  0000 C CNN
-F 2 "Resistors_SMD:R_0603_HandSoldering" V 5630 4500 50  0001 C CNN
-F 3 "" H 5700 4500 50  0000 C CNN
-	1    5700 4500
+P 6150 4500
+F 0 "R14" V 6230 4500 50  0000 C CNN
+F 1 "470R" V 6050 4500 50  0000 C CNN
+F 2 "Resistors_SMD:R_0603_HandSoldering" V 6080 4500 50  0001 C CNN
+F 3 "" H 6150 4500 50  0000 C CNN
+	1    6150 4500
 	0    1    1    0   
 $EndComp
 $Comp
 L GND #PWR02
 U 1 1 5A0A73FA
-P 5250 4700
-F 0 "#PWR02" H 5250 4450 50  0001 C CNN
-F 1 "GND" H 5250 4550 50  0000 C CNN
-F 2 "" H 5250 4700 50  0000 C CNN
-F 3 "" H 5250 4700 50  0000 C CNN
-	1    5250 4700
+P 5700 4700
+F 0 "#PWR02" H 5700 4450 50  0001 C CNN
+F 1 "GND" H 5700 4550 50  0000 C CNN
+F 2 "" H 5700 4700 50  0000 C CNN
+F 3 "" H 5700 4700 50  0000 C CNN
+	1    5700 4700
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -416,4 +462,25 @@ F 3 "" V 4650 5050 50  0000 C CNN
 	1    4650 5050
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	4800 3600 5700 3600
+Wire Wire Line
+	5700 4300 4800 4300
+$Comp
+L D D11
+U 1 1 5C7F950C
+P 5150 4000
+F 0 "D11" H 5150 4100 50  0000 C CNN
+F 1 "1N4007" H 5150 3900 50  0000 C CNN
+F 2 "Diodes_THT:D_DO-35_SOD27_P7.62mm_Horizontal" H 5150 4000 50  0001 C CNN
+F 3 "" H 5150 4000 50  0001 C CNN
+	1    5150 4000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5150 3850 5150 3600
+Connection ~ 5150 3600
+Wire Wire Line
+	5150 4150 5150 4300
+Connection ~ 5150 4300
 $EndSCHEMATC

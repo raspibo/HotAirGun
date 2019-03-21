@@ -8,33 +8,72 @@ LIBS:analog_devices
 LIBS:analog_switches
 LIBS:atmel
 LIBS:audio
+LIBS:Battery_Management
 LIBS:bbd
+LIBS:Bosch
 LIBS:brooktre
 LIBS:cmos4000
 LIBS:conn
+LIBS:Connector
 LIBS:contrib
 LIBS:cypress
 LIBS:dc-dc
+LIBS:Decawave
 LIBS:device
 LIBS:digital-audio
+LIBS:Diode
+LIBS:Display
+LIBS:driver_gate
 LIBS:dsp
+LIBS:DSP_Microchip_DSPIC33
 LIBS:elec-unifil
 LIBS:ESD_Protection
+LIBS:Espressif
+LIBS:FPGA_Actel
 LIBS:ftdi
 LIBS:gennum
+LIBS:Graphic
 LIBS:hc11
+LIBS:infineon
 LIBS:intel
 LIBS:interface
+LIBS:intersil
 LIBS:ir
 LIBS:Lattice
+LIBS:LED
+LIBS:LEM
 LIBS:linear
+LIBS:Logic_74xgxx
+LIBS:Logic_74xx
+LIBS:Logic_CMOS_4000
+LIBS:Logic_CMOS_IEEE
+LIBS:logic_programmable
+LIBS:Logic_TTL_IEEE
 LIBS:maxim
+LIBS:MCU_Microchip_PIC10
+LIBS:MCU_Microchip_PIC12
+LIBS:MCU_Microchip_PIC16
+LIBS:MCU_Microchip_PIC18
+LIBS:MCU_Microchip_PIC24
+LIBS:MCU_Microchip_PIC32
+LIBS:MCU_NXP_Kinetis
+LIBS:MCU_NXP_LPC
+LIBS:MCU_NXP_S08
+LIBS:MCU_Parallax
+LIBS:MCU_ST_STM8
+LIBS:MCU_ST_STM32
+LIBS:MCU_Texas_MSP430
+LIBS:Mechanical
 LIBS:memory
 LIBS:microchip
 LIBS:microcontrollers
+LIBS:modules
+LIBS:Motor
 LIBS:motor_drivers
 LIBS:motorola
+LIBS:Msystem
 LIBS:nordicsemi
+LIBS:nxp
 LIBS:onsemi
 LIBS:opto
 LIBS:Oscillators
@@ -45,15 +84,25 @@ LIBS:powerint
 LIBS:pspice
 LIBS:references
 LIBS:regul
+LIBS:Relay
 LIBS:relays
+LIBS:RF_Bluetooth
 LIBS:rfcom
+LIBS:RFSolutions
+LIBS:Sensor_Current
+LIBS:Sensor_Humidity
 LIBS:sensors
 LIBS:silabs
 LIBS:siliconi
 LIBS:supertex
+LIBS:Switch
 LIBS:switches
 LIBS:texas
+LIBS:Transformer
+LIBS:Transistor
 LIBS:transistors
+LIBS:triac_thyristor
+LIBS:Valve
 LIBS:valves
 LIBS:video
 LIBS:wiznet
@@ -62,6 +111,7 @@ LIBS:Xicor
 LIBS:xilinx
 LIBS:zetex
 LIBS:Zilog
+LIBS:arduino
 LIBS:HotAirGun-cache
 EELAYER 25 0
 EELAYER END
@@ -537,7 +587,7 @@ F 3 "" H 4550 3960 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Q_NPN_CBE Q1
+L Q_NPN_EBC Q1
 U 1 1 5C09B046
 P 2950 2950
 F 0 "Q1" H 3150 3000 50  0000 L CNN
