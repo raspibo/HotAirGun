@@ -12,23 +12,23 @@
 #define TDebug		1000
 
 //Parameter definition
-#define D_MinT		200
-#define D_MaxT		450
+#define D_MinT		200	//Default minimal temperature 
+#define D_MaxT		450     //Default max temperature (remember.... max 450!)
 #define D_KP		2
 #define D_KI		5
 #define D_KD		7
 #define D_TempGunApp	250
 #define D_AirFlowApp	100
-#define	D_AirFlowMin	40
-#define	D_AirFlowMax	100
+#define	D_AirFlowMin	40	//Default minimal air flow
+#define	D_AirFlowMax	100	//Default minimal air flow
 #define	D_Min_Pid	0
 #define	D_Max_Pid	250
 #define D_WeldCurv	1
-#define D_Target1   200
-#define D_Time1		20
-#define D_Target2   250
-#define D_Time2		20
-#define	D_AutoOffTime	32000
+#define D_Target1   	200	//Default target temp for weld curve
+#define D_Time1		20	//Default target temp for weld curve
+#define D_Target2   	250	//Default target temp for weld curve
+#define D_Time2		20	//Default target temp for weld curve
+#define	D_AutoOffTime	32000	//Default off timer 
 
 
 #define   LCD_Update	100
@@ -178,10 +178,10 @@ const char *MenuVoice[Menu_TITLES][10] =
 
    TempCurve var
 
-   |           _______________<time
-   |         / ^target        \
-   |  ______/<time             \
-   | /   ^target
+   |           _______________<Time2
+   |         / ^Target2        \
+   |  ______/<Time1             \
+   | /   ^Target1
    |/
    L-----------------------------
    Set the themperature to a certain value.
