@@ -142,8 +142,8 @@ int WeldCurv, Target1, Time1, Target2, Time2;
 long TimeStabl, TimeBuzz, TimeRamp, TimeTarg1, TimeTarg2;
 bool TempInDelt, StartWlC, LiftUp;
 int Delta;
-#define Del_WlC	3
-#define TBuzz	1000
+#define Del_WlC	3	//Store ActTemp - TempGun on weld curve cycle
+#define TBuzz	1000	//Buzzer time duration ms
 #define TRamp	300
 
 int X = 0;
@@ -434,6 +434,7 @@ void weldCurve() {
 		  TimeRamp = millis() + TRamp;
 	    }
 	 }
+	 //Check weldcurve end monitoring target2 temperature and time2 time then reset all vars
 	 if (TempGunApp == Target2){
 		 if ( ! TimeTarg2) TimeTarg2 = millis()+(Time2 * 1000);
 		 if (millis() > TimeTarg2){
