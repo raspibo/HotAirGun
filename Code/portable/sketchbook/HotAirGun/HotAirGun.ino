@@ -6,7 +6,7 @@
 #include <EEPROM.h>
 
 //Debug
-//#define SerilaPlot
+#define SerialPlot
 //#define F_Debug			//Uncomment to enable the "fast debug" use for event
 #define S_Debug			//Uncomment to enable the schedule debug
 #define TDebug		1000
@@ -34,7 +34,7 @@
 #define   LCD_Update	100	//UNUSED? LCD refresh interval
 //#define   PID_Update	100
 
-#define   PidTime	120	//Period 1 sec 60Hz		100	/Period 1S 50Hz
+#define   PidTime	100	//Period 1 sec 60Hz		100	/Period 1S 50Hz
 #define   TStop		25	//UNUSED? 
 
 #define   SumE_Min      -1000	//UNUSED? 
@@ -638,7 +638,7 @@ void DefVal() {
 }
 
 void setup() {
-  //#ifdef F_Debug || defined S_Debug || SerilaPlot
+  //#ifdef F_Debug || defined S_Debug || SerialPlot
   Serial.begin(2000000);
   Serial.print("Startup");
  // #endif					// set up the LCD's number of rows and columns:
@@ -761,7 +761,7 @@ void loop() {
   if (DoPid) {          //Check if PID recalc is needed(recalc after 1 second)
     PID();
     DoPid = 0;
-#if defined SerilaPlot
+#if defined SerialPlot
     Serial.print(ActTemp);
     Serial.print("\t");
     Serial.print(TempGun);
