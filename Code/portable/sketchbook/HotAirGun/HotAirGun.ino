@@ -31,16 +31,16 @@
 #define	D_AutoOffTime	32000	//Default off timer 
 
 
-#define   LCD_Update	100
+#define   LCD_Update	100	//UNUSED? LCD refresh interval
 //#define   PID_Update	100
 
 #define   PidTime	120	//Period 1 sec 60Hz		100	/Period 1S 50Hz
-#define   TStop		25
+#define   TStop		25	//UNUSED? 
 
-#define   SumE_Min      -1000
-#define   SumE_Max      1000
-#define   Pid_Out_Min	0
-#define   Pid_Out_Max	2000 ////1200
+#define   SumE_Min      -1000	//UNUSED? 
+#define   SumE_Max      1000	//UNUSED? 
+#define   Pid_Out_Min	0	//Minimum limit for Pid calculation
+#define   Pid_Out_Max	2000 ////1200 //Maximum limit for Pid calculation
 
 //EEPROM data storage
 #define   M_Temp	2
