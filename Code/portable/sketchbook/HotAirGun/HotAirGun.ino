@@ -6,41 +6,41 @@
 #include <EEPROM.h>
 
 //Debug
-//#define SerilaPlot
+#define SerialPlot
 //#define F_Debug			//Uncomment to enable the "fast debug" use for event
 #define S_Debug			//Uncomment to enable the schedule debug
 #define TDebug		1000
 
 //Parameter definition
-#define D_MinT		200
-#define D_MaxT		450
+#define D_MinT		200	//Default minimal temperature 
+#define D_MaxT		450     //Default max temperature (remember.... max 450!)
 #define D_KP		2
 #define D_KI		5
 #define D_KD		7
 #define D_TempGunApp	250
 #define D_AirFlowApp	100
-#define	D_AirFlowMin	40
-#define	D_AirFlowMax	100
+#define	D_AirFlowMin	40	//Default minimal air flow
+#define	D_AirFlowMax	100	//Default minimal air flow
 #define	D_Min_Pid	0
 #define	D_Max_Pid	250
 #define D_WeldCurv	1
-#define D_Target1   200
-#define D_Time1		20
-#define D_Target2   250
-#define D_Time2		20
-#define	D_AutoOffTime	32000
+#define D_Target1   	200	//Default target temp for weld curve
+#define D_Time1		20	//Default target temp for weld curve
+#define D_Target2   	250	//Default target temp for weld curve
+#define D_Time2		20	//Default target temp for weld curve
+#define	D_AutoOffTime	32000	//Default off timer 
 
 
-#define   LCD_Update	100
+#define   LCD_Update	100	//UNUSED? LCD refresh interval
 //#define   PID_Update	100
 
-#define   PidTime	120	//Period 1 sec 60Hz		100	/Period 1S 50Hz
-#define   TStop		25
+#define   PidTime	100	//Period 1 sec 60Hz		100	/Period 1S 50Hz
+#define   TStop		25	//UNUSED? 
 
-#define   SumE_Min      -1000
-#define   SumE_Max      1000
-#define   Pid_Out_Min	0
-#define   Pid_Out_Max	2000 ////1200
+#define   SumE_Min      -1000	//UNUSED? 
+#define   SumE_Max      1000	//UNUSED? 
+#define   Pid_Out_Min	0	//Minimum limit for Pid calculation
+#define   Pid_Out_Max	2000 ////1200 //Maximum limit for Pid calculation
 
 //EEPROM data storage
 #define   M_Temp	2
@@ -142,8 +142,8 @@ int WeldCurv, Target1, Time1, Target2, Time2;
 long TimeStabl, TimeBuzz, TimeRamp, TimeTarg1, TimeTarg2;
 bool TempInDelt, StartWlC, LiftUp;
 int Delta;
-#define Del_WlC	3
-#define TBuzz	1000
+#define Del_WlC	3	//Store ActTemp - TempGun on weld curve cycle
+#define TBuzz	1000	//Buzzer time duration ms
 #define TRamp	300
 
 int X = 0;
@@ -178,10 +178,10 @@ const char *MenuVoice[Menu_TITLES][10] =
 
    TempCurve var
 
-   |           _______________<time
-   |         / ^target        \
-   |  ______/<time             \
-   | /   ^target
+   |           _______________<Time2
+   |         / ^Target2        \
+   |  ______/<Time1             \
+   | /   ^Target1
    |/
    L-----------------------------
    Set the themperature to a certain value.
@@ -434,6 +434,7 @@ void weldCurve() {
 		  TimeRamp = millis() + TRamp;
 	    }
 	 }
+	 //Check weldcurve end monitoring target2 temperature and time2 time then reset all vars
 	 if (TempGunApp == Target2){
 		 if ( ! TimeTarg2) TimeTarg2 = millis()+(Time2 * 1000);
 		 if (millis() > TimeTarg2){
@@ -637,7 +638,7 @@ void DefVal() {
 }
 
 void setup() {
-  //#ifdef F_Debug || defined S_Debug || SerilaPlot
+  //#ifdef F_Debug || defined S_Debug || SerialPlot
   Serial.begin(2000000);
   Serial.print("Startup");
  // #endif					// set up the LCD's number of rows and columns:
@@ -760,7 +761,7 @@ void loop() {
   if (DoPid) {          //Check if PID recalc is needed(recalc after 1 second)
     PID();
     DoPid = 0;
-#if defined SerilaPlot
+#if defined SerialPlot
     Serial.print(ActTemp);
     Serial.print("\t");
     Serial.print(TempGun);
