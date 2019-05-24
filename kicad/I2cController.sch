@@ -531,7 +531,7 @@ F 3 "" H 1750 2750 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	1750 1850 1750 2600
-Text GLabel 6300 1650 1    60   Input ~ 0
+Text GLabel 6300 1450 1    60   Input ~ 0
 Vcc_P
 Text GLabel 7600 3350 2    60   Input ~ 0
 Vcc_P
@@ -622,5 +622,21 @@ $EndComp
 Text GLabel 9400 1950 1    60   Input ~ 0
 Vcc_P
 Text GLabel 9400 2250 3    60   Input ~ 0
+Gnd_P
+$Comp
+L C C6
+U 1 1 5CE7F5AB
+P 6450 1550
+F 0 "C6" V 6550 1600 50  0000 L CNN
+F 1 "100nf" V 6300 1550 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0603_HandSoldering" H 6488 1400 50  0001 C CNN
+F 3 "" H 6450 1550 50  0001 C CNN
+	1    6450 1550
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6300 1450 6300 1650
+Connection ~ 6300 1550
+Text GLabel 6600 1550 2    60   Input ~ 0
 Gnd_P
 $EndSCHEMATC
