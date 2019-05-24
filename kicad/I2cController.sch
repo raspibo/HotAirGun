@@ -608,4 +608,19 @@ Connection ~ 6900 3450
 Wire Wire Line
 	7100 3750 7100 3250
 Connection ~ 7100 3250
+$Comp
+L CP C5
+U 1 1 5CE7B713
+P 9400 2100
+F 0 "C5" H 9425 2200 50  0000 L CNN
+F 1 "10uF" H 9425 2000 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D10.0mm_P5.00mm" H 9438 1950 50  0001 C CNN
+F 3 "" H 9400 2100 50  0001 C CNN
+	1    9400 2100
+	1    0    0    -1  
+$EndComp
+Text GLabel 9400 1950 1    60   Input ~ 0
+Vcc_P
+Text GLabel 9400 2250 3    60   Input ~ 0
+Gnd_P
 $EndSCHEMATC
