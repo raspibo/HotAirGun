@@ -5,6 +5,7 @@ Hot Air Solder station project
 
 Project preview
 =====================
+
 <table>
 <tr>
 <td>
@@ -25,6 +26,8 @@ Project preview
 </td>
 </tr>
 </table>
+
+
 License and copyright
 =====================
 
