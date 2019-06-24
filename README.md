@@ -5,9 +5,13 @@ Hot Air Solder station project
 
 Project preview
 =====================
-<img src="Pict/NewVer.jpg" width="400">
+<img src="Pict/NewVer.jpg" width="300">
+<img src="Pict/Front_start.jpg" width="300">
+<img src="Pict/Top_side.jpg" width="300">
+<img src="Pict/Left_side.jpg" width="300">
+<img src="Pict/Right_side.jpg" width="300">
 
-<img src="Pict/Frame1.jpg" width="400">
+<img src="Pict/Frame1.jpg" width="300">
 
 License and copyright
 =====================
