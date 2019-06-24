@@ -11,12 +11,12 @@ Project preview
 <img src="Pict/NewVer.jpg" width="400">
 </td><td>
 <img src="Pict/Front_start.jpg" width="400">
+</td><td>
+<img src="Pict/Top_side.jpg" width="400">
 </td>
 </tr>
 <tr>
 <td>
-<img src="Pict/Top_side.jpg" width="300">
-</td><td>
 <img src="Pict/Left_side.jpg" width="300">
 </td><td>
 <img src="Pict/Right_side.jpg" width="300">
