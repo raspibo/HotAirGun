@@ -24,6 +24,7 @@ Project preview
 <img src="Pict/Frame1.jpg" width="300">
 </td>
 </tr>
+</table>
 License and copyright
 =====================
 
