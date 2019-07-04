@@ -31,7 +31,7 @@
 #define	D_AutoOffTime	32000	//Default off timer 
 
 
-#define   LCD_Update	100	//UNUSED? LCD refresh interval
+//#define   LCD_Update	100	//UNUSED? LCD refresh interval
 //#define   PID_Update	100
 
 #define   PidTime	100	//Period 1 sec 60Hz		100	/Period 1S 50Hz
@@ -190,12 +190,14 @@ const char *MenuVoice[Menu_TITLES][10] =
    const uint8_t TempCurve[]={target,time,target,time};
 */
 
+/*
 const uint8_t TempCurve[] = {   //target temp   //time to mantain temp
   150,      6,    //prehot
   155,      4,    //weld temp
   150,      5,    //weld temp
   180             //temperature after welding
 };
+*/
 
 void HandleMCPInterrupt() {
   detachInterrupt(ArdMCPInterrupt);
