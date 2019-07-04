@@ -34,7 +34,8 @@
 //#define   LCD_Update	100	//UNUSED? LCD refresh interval
 //#define   PID_Update	100
 
-#define   PidTime	100	//Period 1 sec 60Hz		100	/Period 1S 50Hz
+#define   PidTime	25	//Period 1 sec 60Hz		100	/Period 1S 50Hz
+#define   ZeroCrossSec  100	//100 For 50Hz 120 for 60HZ 
 #define   TStop		50	//Safe temp to disable GUN AirFlow
 
 //#define   SumE_Min      -1000	//UNUSED? 
@@ -264,10 +265,10 @@ void ZeroCCallBack() {      //High priority interrupt, only minimal operation an
   sbi(PINB, 5);             //Defined by macro on top for fast toggle pin D13 = DEBUGLED
   PhaseCounter++;
   if (PhaseCounter >= PidTime ) {
-    OpTime--;
     PhaseCounter = 0;
     DoPid = 1;
   }
+  OpTime--;
   /*
     TCNT_timer=65413; // 500us
     TCNT_timer=65288; // 1000us
