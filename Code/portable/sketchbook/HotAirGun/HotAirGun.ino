@@ -974,8 +974,8 @@ void loop() {
     AirFlow = 100;
     AirFlowApp = 100;
     //Serial.println("Auto Power OFF");
-    if (ActTemp <= 40) {
-      AirFlow = 0;  //when air on gun is lower than 40 degrees cut off pwn on fan
+    if (ActTemp <= TStop) {
+      AirFlow = 0;  //when air on gun is lower than TStop temp cut off pwm on fan
       OCR2A = 0;
       Serial.println("Fan stop");
       delay(500);
