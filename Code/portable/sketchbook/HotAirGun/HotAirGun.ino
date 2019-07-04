@@ -827,11 +827,11 @@ void loop() {
     contr.setCursor(0, 1);
     if (WeldCycle > 0) {
       contr.print("o:");
-      contr.print(OpTime);
+      contr.print(OpTime/ZeroCrossSec);
     }
     else {
       contr.print("t:");
-      contr.print(OpTime);
+      contr.print(OpTime/ZeroCrossSec);
     }
     LcdUpd = millis() + TimeLcd;
   }
