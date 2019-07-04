@@ -35,10 +35,10 @@
 //#define   PID_Update	100
 
 #define   PidTime	100	//Period 1 sec 60Hz		100	/Period 1S 50Hz
-#define   TStop		25	//UNUSED? 
+#define   TStop		50	//Safe temp to disable GUN AirFlow
 
-#define   SumE_Min      -1000	//UNUSED? 
-#define   SumE_Max      1000	//UNUSED? 
+//#define   SumE_Min      -1000	//UNUSED? 
+//#define   SumE_Max      1000	//UNUSED? 
 #define   Pid_Out_Min	0	//Minimum limit for Pid calculation
 #define   Pid_Out_Max	2000 ////1200 //Maximum limit for Pid calculation
 
@@ -580,11 +580,11 @@ void startstop() {            //Handler for start/stop button
         break;
       case 2: //10
         RelayStartTime = 0; //Reset Relay activation time count
-        TempGun = 0;    //Set TempGun to 0 -> shutdown triac, do not change
+        TempGun = TStop;    //Set TempGun to 0 -> shutdown triac, do not change
         delay(150);
         digitalWrite(EMERG_RELAY, LOW); //Disable power to gun
         AirFlow = 100;
-        if (ActTemp < 30) { //When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
+        if (ActTemp < TStop) { //When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
           AirFlow = 0;
         }
         break;
@@ -607,7 +607,7 @@ void startstop() {            //Handler for start/stop button
           AirFlow = AirFlowApp;
 	    }
     }
-  if (WeldStatus == 2 && ActTemp < 30)AirFlow = 0;
+  if (WeldStatus == 2 && ActTemp < TStop)AirFlow = 0;
 }
 
 void DefVal() {
