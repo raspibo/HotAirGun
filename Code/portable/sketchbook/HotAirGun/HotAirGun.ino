@@ -299,8 +299,8 @@ ISR(TIMER1_OVF_vect) { //timer1 overflow
 void Debug() {
   GG = ~GG;
   contr.WriteLed(LED_4, GG);
-  Serial.println(Menu,DEC);
-  Serial.println(WeldCycle,DEC);
+  //Serial.println(Menu,DEC);
+  //Serial.println(WeldCycle,DEC);
   //digitalWrite(LedV, !(digitalRead(LedV)));
   // Serial.println("Debug Programma");
   // Serial.print("MenuDec");
@@ -586,6 +586,7 @@ void startstop() {            //Handler for start/stop button
         AirFlow = 100;
         if (ActTemp < TStop) { //When weld cicle finish (button set to stop) wait for cold temperature and stop air flow
           AirFlow = 0;
+	  TempGun = 0;
         }
         break;
     }
@@ -607,7 +608,10 @@ void startstop() {            //Handler for start/stop button
           AirFlow = AirFlowApp;
 	    }
     }
-  if (WeldStatus == 2 && ActTemp < TStop)AirFlow = 0;
+  if (WeldStatus == 2 && ActTemp < TStop) {
+	AirFlow = 0;
+	TempGun = 0;
+  }
 }
 
 void DefVal() {
