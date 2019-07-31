@@ -1,4 +1,4 @@
-
+//Code and project description http://www.raspibo.org/wiki/index.php?title=HotAirGun
 
 // include the library code:
 #include <Wire.h>
